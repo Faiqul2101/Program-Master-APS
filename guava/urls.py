@@ -2,8 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # LOGIN
+
+    # HOME
     path('home',views.home, name="home"),
+
+    # LOGIN
     path('',views.loginview, name='login'),
     path('performlogin',views.performlogin,name="performlogin"),
     path('performlogout',views.performlogout,name="performlogout"),
@@ -25,5 +28,26 @@ urlpatterns = [
     path('deleteproduk/<str:id>', views.delete_produk,name='deleteproduk'),
 
     # PASAR
+    path('pasar/', views.pasar,name='pasar'),
+    path('pasar/createpasar', views.create_pasar,name='createpasar'),
+    path('pasar/updatepasar/<str:id>', views.update_pasar,name='updatepasar'),
+    path('deletepasar/<str:id>', views.delete_pasar,name='deletepasar'),
 
+    # KOMODITAS
+    path('komoditas/', views.komoditas,name='komoditas'),
+    path('komoditas/createkomoditas', views.create_komoditas,name='createkomoditas'),
+    path('komoditas/updatekomoditas/<str:id>', views.update_komoditas,name='updatekomoditas'),
+    path('deletekomoditas/<str:id>', views.delete_komoditas,name='deletekomoditas'),
+
+    # TRANSAKSI LAIN
+    path('transaksilain/', views.transaksi_lain,name='transaksilain'),
+    path('transaksilain/createtransaksilain', views.create_transaksi_lain,name='createtransaksilain'),
+    path('transaksilain/updatetransaksilain/<str:id>', views.update_transaksi_lain,name='updatetransaksilain'),
+    path('deletetransaksilain/<str:id>', views.delete_transaksi_lain,name='deletetransaksilain'),
+
+    # PANEN
+    path('panen/', views.panen,name='panen'),
+    path('panen/createpanen/<int:id>/', views.create_panen,name='createpanen'),
+    path('panen/updatepanen/<str:id>', views.update_panen,name='updatepanen'),
+    path('deletepanen/<str:id>', views.delete_panen,name='deletepanen'),
 ]
