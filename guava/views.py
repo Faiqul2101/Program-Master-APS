@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from . import models
 from datetime import datetime
 # Create your views here.
-
+# galo
 def mitra(request):
     mitraobj = models.mitra.objects.all()
     # is_admin = request.user.groups.filter(name='Admin').exists()
