@@ -9,7 +9,7 @@ class mitra(models.Model):
     tanggal_mulai_mitra = models.DateField()
     durasi_kontrak = models.PositiveIntegerField()
     luas_lahan = models.PositiveIntegerField(null=True)
-    status_mitra = models.BooleanField(default=False)
+    status_mitra = models.BooleanField(default=None, null=True)
 
     def __str__(self):
         return str(self.nama_mitra)

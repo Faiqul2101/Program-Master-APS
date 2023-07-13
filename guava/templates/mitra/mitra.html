@@ -414,15 +414,18 @@
                                             <td>{{ item.durasi_kontrak }}</td>
                                             <td>{{ item.luas_lahan }}</td>
                                             <td>
-                                                {% if item.status_mitra %}
-                                                    Terdaftar
+                                                {% if item.status_mitra == True %}
+                                                Terdaftar
+                                                {% elif item.status_mitra == False %}
+                                                Tidak Terdaftar
                                                 {% else %}
-                                                    Belum Terdaftar
+                                                    On Progress
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{% url 'mitra' %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'mitra'  %}"><button class="btn btn-danger">Delete</button></a>
+                                                <a href="{% url 'updatemitra' item.id_mitra %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'validasimitra' item.id_mitra %}"><button class="btn btn-success">Validasi</button></a>
+                                                <a href="{% url 'deletemitra' item.id_mitra  %}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
                                         </tr>
                                         {% endfor %}

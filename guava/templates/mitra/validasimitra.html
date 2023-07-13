@@ -373,7 +373,7 @@
                 <div class="container-sm">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Update Data Mitra</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Validasi Data Mitra</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
@@ -388,39 +388,10 @@
                             <!-- <form action="" method="post"> -->
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Nama Mitra</label>
-                                    <input required type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="nama_mitra"
-                                    value="{{ mitraobj.nama_mitra }}">
+                                    <label for="exampleInputPassword1" class="form-label">Luas Lahan</label>
+                                    <input required type="number" class="form-control" id="exampleInputPassword1" name="luas_lahan"
+                                    value="{{ mitraobj.luas_lahan }}">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Alamat</label>
-                                    <input class="form-control" id="exampleFormControlSelect1" name="alamat_mitra"
-                                    value="{{ mitraobj.alamat_mitra }}">
-                                        <!-- <option selected value="Obat Bebas">Obat Bebas</option>
-                                        <option value="Obat Bebas Terbatas">Obat Bebas Terbatas</option>
-                                        <option value="Obat Keras">Obat Keras</option> -->
-                                        </input>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Nomor</label>
-                                    <input class="form-control" id="exampleFormControlSelect1" name="nomor_mitra"
-                                    value="{{ mitraobj.nomor_mitra }}">
-                                        <!-- <option selected value="Pcs">Pcs</option>
-                                        <option value="Botol">Botol</option>
-                                        <option value="Box">Box</option> -->
-                                        </input>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Tanggal Mulai</label>
-                                    <input required type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="tanggal_mulai_mitra"
-                                    value="{{ tanggal }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Durasi Kontrak</label>
-                                    <input required type="number" class="form-control" id="exampleInputPassword1" name="durasi_kontrak"
-                                    value="{{ mitraobj.durasi_kontrak }}">
-                                </div>
-                                
                                 <button type="submit" class="btn btn-secondary">Update</button>
                             </form>
                         </div>

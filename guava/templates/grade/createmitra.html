@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>UPDATE OBAT</title>
+    <title>ADD OBAT</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -33,10 +33,10 @@
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <div class="sidebar-brand-icon">
+                    <img src="{% static 'guava/logo.png' %}" alt="Logo" />
                 </div>
-                <div class="sidebar-brand-text mx-3">APOTEK LOSIK</div>
+                <div class="sidebar-brand-text mx-3">CV BUMIAJI</div>
             </a>
 
             <!-- Divider -->
@@ -145,6 +145,7 @@
                     </div>
                 </div>
             </li>
+
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -368,12 +369,12 @@
 
                 </nav>
                 <!-- End of Topbar -->
-
+                                
                 <!-- Begin Page Content -->
-                <div class="container-sm">
+                    <div class="container-sm">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Update Data Mitra</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Add Obat</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
@@ -381,21 +382,19 @@
                     <!-- Form -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Mitra</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Obat</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" id="updateobat">
+                            <form method="post" id="createmitra">
                             <!-- <form action="" method="post"> -->
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Nama Mitra</label>
-                                    <input required type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="nama_mitra"
-                                    value="{{ mitraobj.nama_mitra }}">
+                                    <input required type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="nama_mitra">
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputPassword1" class="form-label">Alamat</label>
-                                    <input class="form-control" id="exampleFormControlSelect1" name="alamat_mitra"
-                                    value="{{ mitraobj.alamat_mitra }}">
+                                    <input class="form-control" id="exampleFormControlSelect1" name="alamat_mitra">
                                         <!-- <option selected value="Obat Bebas">Obat Bebas</option>
                                         <option value="Obat Bebas Terbatas">Obat Bebas Terbatas</option>
                                         <option value="Obat Keras">Obat Keras</option> -->
@@ -403,8 +402,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Nomor</label>
-                                    <input class="form-control" id="exampleFormControlSelect1" name="nomor_mitra"
-                                    value="{{ mitraobj.nomor_mitra }}">
+                                    <input class="form-control" id="exampleFormControlSelect1" name="nomor_mitra">
                                         <!-- <option selected value="Pcs">Pcs</option>
                                         <option value="Botol">Botol</option>
                                         <option value="Box">Box</option> -->
@@ -412,16 +410,17 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Tanggal Mulai</label>
-                                    <input required type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="tanggal_mulai_mitra"
-                                    value="{{ tanggal }}">
+                                    <input required type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="tanggal_mulai_mitra">
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputPassword1" class="form-label">Durasi Kontrak</label>
-                                    <input required type="number" class="form-control" id="exampleInputPassword1" name="durasi_kontrak"
-                                    value="{{ mitraobj.durasi_kontrak }}">
+                                    <input required type="number" class="form-control" id="exampleInputPassword1" name="durasi_kontrak">
                                 </div>
-                                
-                                <button type="submit" class="btn btn-secondary">Update</button>
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Luas Lahan</label>
+                                    <input required type="number" class="form-control" id="exampleInputPassword1" name="luas_lahan">
+                                </div>
+                                <button type="submit" class="btn btn-secondary">Submit</button>
                             </form>
                         </div>
                     </div>
