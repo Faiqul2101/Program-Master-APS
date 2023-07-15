@@ -47,7 +47,14 @@ urlpatterns = [
 
     # PANEN
     path('panen/', views.panen,name='panen'),
-    path('panen/createpanen/<int:id>/', views.create_panen,name='createpanen'),
+    
     path('panen/updatepanen/<str:id>', views.update_panen,name='updatepanen'),
     path('deletepanen/<str:id>', views.delete_panen,name='deletepanen'),
-]
+
+    # DETAIL PANEN
+    path('panen/createpanen/<str:id>/', views.create_panen,name='createpanen'),
+    path('detailpanen/', views.detailpanen,name='detailpanen'),
+    # path('detailpanen/createdetailpanen/<int:id>/', views.create_detailpanen,name='createdetailpanen'),
+    
+    
+    ]

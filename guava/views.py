@@ -5,7 +5,9 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth import login , logout, authenticate
 from django.contrib.auth.decorators import login_required
-
+from django.forms import inlineformset_factory
+from django.forms import DateInput
+from django.db import transaction
 # Create your views here.
 
 @login_required
@@ -27,7 +29,7 @@ def logoutview(request):
 
 def loginview(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("mitra")
     else:
         return render(request,"loginsiam.html")
     
@@ -58,6 +60,7 @@ def performlogout(request):
 
 def mitra(request):
     mitraobj = models.mitra.objects.all()
+    
     # is_admin = request.user.groups.filter(name='Admin').exists()
     # is_pegawai = request.user.groups.filter(name='Pegawai').exists()
 
@@ -262,6 +265,7 @@ def update_komoditas(request, id):
     else:
         id_grade = request.POST['id_grade']
         getidgrade = models.grade.objects.get(id_grade=id_grade)
+        allkomoditasobj.nama_komoditas = request.POST['nama_komoditas']
         allkomoditasobj.harga_beli = request.POST['harga_beli']
         allkomoditasobj.harga_jual = request.POST['harga_jual']
         allkomoditasobj.id_grade = getidgrade
@@ -332,21 +336,89 @@ def panen(request):
 
 @login_required
 def create_panen(request, id):
-    if request.method == 'GET':
+    try:
         mitraobj = models.mitra.objects.get(id_mitra=id)
-        return render(request, 'panen/createpanen.html', {
-            'mitraobj': mitraobj
+    except models.mitra.DoesNotExist:
+        return HttpResponse("Mitra not found")
+
+    OrderFormSet = inlineformset_factory(
+        models.panen,
+        models.detail_panen,
+        fields=('id_komoditas', 'jumlah', 'tanggalkadaluwarsa'),
+        extra=2,
+        can_delete=True,
+        widgets={
+            'tanggalkadaluwarsa': DateInput(attrs={'type': 'date'})
+        }
+    )
+
+    if request.method == 'GET':
+        formset = OrderFormSet(instance=models.panen(id_mitra=mitraobj))
+        return render(request, 'detailpanen/createdetailpanen.html', {
+            'mitraobj': mitraobj,
+            'formset': formset
         })
 
-    elif request.method == "POST":
-        tanggal_panen= request.POST["tanggal_panen"]
+    elif request.method == 'POST':
+        formset = OrderFormSet(request.POST)
+        if formset.is_valid():
+            with transaction.atomic():
+                panen_instance = models.panen.objects.create(id_mitra=mitraobj, tanggal_panen=datetime.now())
+                formset.instance = panen_instance
+                formset.save()
+            return redirect('panen')
 
-        newpanen = models.panen.objects.create(
-            id_mitra_id=id,
-            tanggal_panen=tanggal_panen
-        )
+    context = {'formset': formset}
+    return render(request, 'panen/createpanen.html', context)
 
-        return redirect('panen')
+
+
+
+
+
+
+
+
+
+# def create_panen(request, id):
+#     if request.method == 'GET':
+#         mitraobj = models.mitra.objects.get(id_mitra=id)
+#         return render(request, 'panen/createpanen.html', {
+#             'mitraobj': mitraobj
+#         })
+
+#     elif request.method == "POST":
+#         tanggal_panen= datetime.now()
+
+#         newpanen = models.panen.objects.create(
+#             id_mitra_id=id,
+#             tanggal_panen=tanggal_panen
+#         )
+
+#         return redirect('panen')
+
+# def create_detailpanen(request, id):
+
+
+#     OrderFormSet = inlineformset_factory(
+#         models.panen,
+#         models.detail_panen,
+#         fields = ('id_komoditas', 'jumlah', 'tanggalkadaluwarsa'),
+#         extra=2,
+#         can_delete=True,
+#     widgets={
+#         'tanggalkadaluwarsa': DateInput(attrs={'type': 'date'})
+#     }
+#         )
+#     panen = models.panen.objects.get(id_panen = id)
+#     formset = OrderFormSet (instance = panen)
+#     if request.method == 'POST':
+#         formset = OrderFormSet (request.POST, instance = panen)
+#         if formset.is_valid():  
+#             formset.save()
+#             return redirect('panen')
+#     context = {'formset' : formset}
+#     return render (request, 'detailpanen/createdetailpanen.html', context)
 
 
 @login_required
@@ -373,3 +445,12 @@ def delete_panen(request,id):
     panen_obj = models.panen.objects.get(id_panen = id)
     panen_obj.delete()
     return redirect('panen')
+
+
+@login_required
+def detailpanen(request):
+    alldetailpanenobj = models.detail_panen.objects.all()
+    print(alldetailpanenobj)
+    return render(request, 'detailpanen/detailpanen.html', {
+        "alldetailpanenobj" : alldetailpanenobj
+        })

@@ -38,7 +38,8 @@ class komoditas(models.Model):
     harga_jual = models.IntegerField()
 
     def __str__(self):
-        return str(self.nama_komoditas)
+        return "{} - {}".format(self.nama_komoditas, self.id_grade)
+
 
 class detail_panen(models.Model):
     id_detailpanen = models.AutoField(primary_key=True)

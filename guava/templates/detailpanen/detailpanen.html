@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mitra</title>
+    <title>Detail Panen</title>
 
     <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -100,7 +100,7 @@
             <div class="sidebar-heading">
                 Transaksi
             </div>
-            {% if is_admin %}    
+
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
@@ -112,11 +112,10 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
                         <a class="collapse-item" href="{%url 'createmitra'%}">Data Penjualan</a>
-                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Penjualan</a>
+                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Penjualan</a>
                     </div>
                 </div>
             </li>
-            {%endif%}
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
@@ -372,12 +371,12 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                
+
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Data Panen</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Data Detail Panen</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
@@ -385,30 +384,34 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Data Mitra</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Data Detail Panen</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
+                                            <th>ID Detail Panen</th>
                                             <th>ID Panen</th>
-                                            <th>ID Mitra</th>
+                                            <th>Nama Mitra</th>
+                                            <th>Nama Komoditas - Grade</th>
+                                            <th>Jumlah Panen</th>
                                             <th>Tanggal Panen</th>
+                                            <th>Tanggal Kadaluwarsa</th>
                                             <th>Action</th>        
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in allpanenobj %}
+                                        {% for item in alldetailpanenobj %}
                                         <tr>
-                                            <td>{{ item.id_panen  }}</td>
-                                            <td>{{ item.id_mitra  }}</td>
-                                            <td>{{ item.tanggal_panen }}</td>
-                                            <td>
-                                                <a href="{% url 'updatepanen' item.id_panen %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'deletepanen' item.id_panen %}"><button class="btn btn-danger">Delete</button></a>
-                                               
-                                            </td>
+                                            <td>{{ item.id_detailpanen }}</td>
+                                            <td>{{ item.id_panen_id }}</td>
+                                            <td>{{ item.id_panen }}</td>
+                                            <td>{{ item.id_komoditas}}  </td>
+                                            <td>{{ item.jumlah}}</td>
+                                            <td>{{item.id_panen.tanggal_panen}}</td>
+                                            <td>{{ item.tanggalkadaluwarsa}}</td>
+                                            
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -466,7 +469,7 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="{% url 'performlogout' %}">Logout</a>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
                 </div>
             </div>
         </div>

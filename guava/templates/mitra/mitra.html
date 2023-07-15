@@ -462,10 +462,16 @@
                                                 <a href="{% url 'updatemitra' item.id_mitra %}"><button class="btn btn-warning">Update</button></a>
                                                 <a href="{% url 'deletemitra' item.id_mitra  %}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
+                                            {% if item.status_mitra == True %}
                                             <td>
                                                 <a href="{% url 'createpanen' item.id_mitra  %}"><button class="btn-custom">Panen</button></a>
-                                                <a href="{% url 'validasimitra' item.id_mitra %}"><button class="btn btn-success">Validasi</button></a>
                                             </td>
+                                            {%endif%}
+                                            {% if item.status_mitra == None %}
+                                            <td>  
+                                                <a href="{% url 'validasimitra' item.id_mitra %}"><button class="btn btn-success">Validasi</button></a>
+                                            </td>  
+                                            {%endif%}
                                         </tr>
                                         {% endfor %}
                                     </tbody>
