@@ -79,9 +79,10 @@ class penjualan(models.Model):
 class detail_penjualan(models.Model):
     id_detailpenjualan = models.AutoField(primary_key=True)
     id_penjualan = models.ForeignKey(penjualan, on_delete=models.CASCADE)
-    id_produk = models.ForeignKey(produk, on_delete=models.CASCADE)
-    id_komoditas = models.ForeignKey(komoditas, on_delete=models.CASCADE)
-    kuantitas = models.PositiveIntegerField()
+    id_produk = models.ForeignKey(produk,null=True, on_delete=models.CASCADE)
+    id_komoditas = models.ForeignKey(komoditas,null=True, on_delete=models.CASCADE)
+    kuantitas_produk = models.PositiveIntegerField(null=True,)
+    kuantitas_komoditas = models.PositiveIntegerField(null=True,)
 
     def __str__(self):
         return str(self.id_penjualan)

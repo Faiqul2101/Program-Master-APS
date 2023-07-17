@@ -109,7 +109,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
                         <a class="collapse-item" href="{%url 'mitra'%}">Data Penjualan</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Penjualan</a>
+                        <a class="collapse-item" href="{%url 'createpenjualan'%}">Tambah Penjualan</a>
                     </div>
                 </div>
             </li>
@@ -385,22 +385,19 @@
                             <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Obat</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" id="adddetailpenjualan">
+                            <form method="post">
                                 {% csrf_token %}
                                 {{ formset.management_form }}
-                                {% for form in formset %}
-                                    {{ form }}
-                                    <hr>
-                                {% endfor %}
-                                
-                                <button type="submit" class="btn btn-secondary">Submit</button>
-                                {% if formset.can_order_formset %}
-                                <button type="button" class="btn btn-secondary" onclick="addFormsetField()">Add</button>
-                                {% endif %}  
-                            </form>
+                                <table>
+                                    {% for form in formset %}
+                                    {{ form.as_table }}
+                                    {% endfor %}
+                                </table>
+                                <button type="submit">Simpan</button>
+                            </form>   
+                            
                             
                         </div>
-                        
                     </div>
                 </div>
             </div>

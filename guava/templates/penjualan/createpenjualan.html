@@ -109,7 +109,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
                         <a class="collapse-item" href="{%url 'mitra'%}">Data Penjualan</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Penjualan</a>
+                        <a class="collapse-item" href="{%url 'createpenjualan'%}">Tambah Penjualan</a>
                     </div>
                 </div>
             </li>
@@ -385,22 +385,26 @@
                             <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Obat</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" id="adddetailpenjualan">
-                                {% csrf_token %}
-                                {{ formset.management_form }}
-                                {% for form in formset %}
-                                    {{ form }}
-                                    <hr>
-                                {% endfor %}
-                                
-                                <button type="submit" class="btn btn-secondary">Submit</button>
-                                {% if formset.can_order_formset %}
-                                <button type="button" class="btn btn-secondary" onclick="addFormsetField()">Add</button>
-                                {% endif %}  
-                            </form>
+                            <form method="post" id="createpenjualan">
+                                <!-- <form action="" method="post"> -->
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="exampleInputPassword1" class="form-label">Nama Pasar</label>
+                                        <select class="form-control" id="exampleInputEmail1" name="id_pasar">
+                                            {% for item in datapasar %}
+                                            <option value="{{item.id_pasar}}">{{item.nama_pasar}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="exampleInputEmail1" class="form-label">Tanggal Penjualan</label>
+                                        <input required type="date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" 
+                                        name="tanggal_penjualan">
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary">Submit</button>
+                                </form>
                             
                         </div>
-                        
                     </div>
                 </div>
             </div>

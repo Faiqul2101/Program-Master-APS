@@ -54,7 +54,18 @@ urlpatterns = [
     # DETAIL PANEN
     path('panen/createpanen/<str:id>/', views.create_panen,name='createpanen'),
     path('detailpanen/', views.detailpanen,name='detailpanen'),
+    path('detailpanen/ubahdetailpanen/<str:id>/', views.ubah_panen,name='ubahdetailpanen'),
     # path('detailpanen/createdetailpanen/<int:id>/', views.create_detailpanen,name='createdetailpanen'),
     
+    # PENJUALAN
+    path('penjualan/', views.penjualan,name='penjualan'),
+    path('penjualan/createpenjualan', views.jual,name='createpenjualan'),
     
+    # DETAIL PENJUALAN
+    path('detailpenjualan1', views.detail_penjualan_komoditas,name='detailpenjualan_komoditas'),
+    path('detailpenjualan2', views.detail_penjualan_produk,name='detailpenjualan_produk'),
+    # path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan, name='createdetailpenjualan'),
+    path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan_produk, name='createdetailpenjualan_produk'),
+    path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan_komoditas, name='createdetailpenjualan_komoditas'),
+
     ]

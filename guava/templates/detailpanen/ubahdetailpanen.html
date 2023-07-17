@@ -392,13 +392,11 @@
                                     {{ form }}
                                     <hr>
                                 {% endfor %}
+                                <button type="submit" class="btn btn-secondary">Add</button>
                                 
-                                <button type="submit" class="btn btn-secondary">Submit</button>
-                                {% if formset.can_order_formset %}
-                                <button type="button" class="btn btn-secondary" onclick="addFormsetField()">Add</button>
-                                {% endif %}  
+
                             </form>
-                            
+                            <a href="{% url 'panen' %}"><button class="btn btn-info">Submit</button></a>
                         </div>
                         
                     </div>

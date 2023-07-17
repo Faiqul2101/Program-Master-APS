@@ -10,16 +10,19 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>ADD PENJUALAN</title>
+    <title>Mitra</title>
 
-    <!-- Custom fonts for this template-->
+    <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template-->
+    <!-- Custom styles for this template -->
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 
 </head>
 
@@ -36,14 +39,14 @@
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">APOTEK LOSIK</div>
+                <div class="sidebar-brand-text mx-3">CV BUMIAJI</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'mitra' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
@@ -58,17 +61,17 @@
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-folder"></i>
-                    <span>Obat</span>
+                    <span>Mitra</span>
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Stok Obat</a>
-                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Obat</a>
+                        <a class="collapse-item" href="{%url 'mitra'%}">Data Mitra</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Mitra</a>
                     </div>
                 </div>
             </li>
@@ -78,14 +81,14 @@
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
                     aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fas fa-fw fa-wrench"></i>
-                    <span>Supplier</span>
+                    <span>Produk</span>
                 </a>
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Data Supplier</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Supplier</a>
+                        <a class="collapse-item" href="{%url 'produk'%}">Data Produk</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Produk</a>
                     </div>
                 </div>
             </li>
@@ -108,8 +111,8 @@
                 <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Data Penjualan</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Penjualan</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Data Penjualan</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Penjualan</a>
                     </div>
                 </div>
             </li>
@@ -124,8 +127,8 @@
                 <div id="collapseMenu" class="collapse" aria-labelledby="headingMenu" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Data Pembelian</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Pembelian</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Data Pembelian</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Pembelian</a>
                     </div>
                 </div>
             </li>
@@ -140,12 +143,11 @@
                 <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Laporan Penjualan</a>
-                        <a class="collapse-item" href="{%url 'mitra'%}">Laporan Pembelian</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Laporan Penjualan</a>
+                        <a class="collapse-item" href="{%url 'createmitra'%}">Laporan Pembelian</a>
                     </div>
                 </div>
             </li>
-
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -369,43 +371,107 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                                
+
                 <!-- Begin Page Content -->
-                    <div class="container-sm">
+                <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Add Obat</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Data Penjualan</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
 
-                    <!-- Form -->
+                    <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Obat</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Data Mitra</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" id="adddetailpenjualan">
-                                {% csrf_token %}
-                                {{ formset.management_form }}
-                                {% for form in formset %}
-                                    {{ form }}
-                                    <hr>
-                                {% endfor %}
-                                
-                                <button type="submit" class="btn btn-secondary">Submit</button>
-                                {% if formset.can_order_formset %}
-                                <button type="button" class="btn btn-secondary" onclick="addFormsetField()">Add</button>
-                                {% endif %}  
-                            </form>
-                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Penjualan</th>
+                                            <th>Nama Pasar</th>
+                                            <th>Tanggal Penjualan</th>
+                                            <th>Action</th>        
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in penjualanobj %}
+                                        <tr>
+                                            <td>{{ item.id_penjualan  }}</td>
+                                            <td>{{ item.id_pasar  }}</td>
+                                            <td>{{ item.tanggal_penjualan}}</td>
+                                            <td>
+                                                <a href="{% url 'penjualan' %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'mitra'%}"><button class="btn btn-danger">Delete</button></a>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'createdetailpenjualan_produk' item.id_penjualan%}"><button class="btn btn-warning">Beli Produk</button></a>
+                                                <a href="{% url 'createdetailpenjualan_komoditas' item.id_penjualan%}"><button class="btn btn-warning">Beli Komoditas</button></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <a href="{% url 'mitra' %}">
+                                            <button class="btn btn-info">
+                                            HOME
+                                            </button>
+                                        </a>
+                                    </div>
+                                </table>
+                            </div>
                         </div>
-                        
                     </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Your Website 2020</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Bootstrap core JavaScript-->
@@ -417,6 +483,13 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+
+    <!-- Page level plugins -->
+    <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
 
 </body>
 

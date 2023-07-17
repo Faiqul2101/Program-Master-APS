@@ -395,7 +395,8 @@
                                             <th>ID Panen</th>
                                             <th>ID Mitra</th>
                                             <th>Tanggal Panen</th>
-                                            <th>Action</th>        
+                                            <th>Action</th>   
+                                            <th></th>     
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -407,7 +408,9 @@
                                             <td>
                                                 <a href="{% url 'updatepanen' item.id_panen %}"><button class="btn btn-warning">Update</button></a>
                                                 <a href="{% url 'deletepanen' item.id_panen %}"><button class="btn btn-danger">Delete</button></a>
-                                               
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'ubahdetailpanen' item.id_panen %}"><button class="btn btn-info">Ubah Panen</button/a>
                                             </td>
                                         </tr>
                                         {% endfor %}

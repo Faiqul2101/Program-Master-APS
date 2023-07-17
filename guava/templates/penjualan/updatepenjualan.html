@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>ADD PENJUALAN</title>
+    <title>UPDATE PEMBELIAN</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -68,7 +68,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Components:</h6>
                         <a class="collapse-item" href="{%url 'mitra'%}">Stok Obat</a>
-                        <a class="collapse-item" href="{%url 'createmitra'%}">Tambah Obat</a>
+                        <a class="collapse-item" href="{%url 'mitra'%}">Tambah Obat</a>
                     </div>
                 </div>
             </li>
@@ -369,12 +369,12 @@
 
                 </nav>
                 <!-- End of Topbar -->
-                                
+
                 <!-- Begin Page Content -->
-                    <div class="container-sm">
+                <div class="container-sm">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Add Obat</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Update Data Pembelian</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
@@ -382,25 +382,21 @@
                     <!-- Form -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Spesifikasi Obat</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Data Pembelian</h6>
                         </div>
                         <div class="card-body">
-                            <form method="post" id="adddetailpenjualan">
+                            <form method="post" id="updatepembelian">
+                            <!-- <form action="" method="post"> -->
                                 {% csrf_token %}
-                                {{ formset.management_form }}
-                                {% for form in formset %}
-                                    {{ form }}
-                                    <hr>
-                                {% endfor %}
                                 
-                                <button type="submit" class="btn btn-secondary">Submit</button>
-                                {% if formset.can_order_formset %}
-                                <button type="button" class="btn btn-secondary" onclick="addFormsetField()">Add</button>
-                                {% endif %}  
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Tanggal Penjualan</label>
+                                    <input required type="date" class="form-control" id="exampleInputPassword1" name="tanggalpenjualan"
+                                    value="{{tanggal}}">
+                                </div>
+                                <button type="submit" class="btn btn-secondary">Update</button>
                             </form>
-                            
                         </div>
-                        
                     </div>
                 </div>
             </div>

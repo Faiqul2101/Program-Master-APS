@@ -8,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.forms import DateInput
 from django.db import transaction
+
 # Create your views here.
 
+#  LOGIN
 @login_required
 def home(request):
     if not request.user.is_authenticated:
@@ -57,6 +59,9 @@ def performlogout(request):
     logout(request)
     print("Anda keluar")
     return redirect("login")
+
+
+# MITRA
 
 def mitra(request):
     mitraobj = models.mitra.objects.all()
@@ -129,11 +134,15 @@ def delete_mitra(request,id):
     mitraobj.delete()
     return redirect('mitra')
 
+# GRADE
+
 def grade(request):
     gradeobj = models.grade.objects.all()
     return render(request, 'grade/grade.html', {
         'gradeobj' : gradeobj
     })
+
+# PRODUK
 
 @login_required
 def produk(request):
@@ -179,6 +188,8 @@ def delete_produk(request, id):
     produkobj.delete()
     return redirect('produk')
 
+# PASAR
+
 @login_required
 def pasar(request):
     pasarobj = models.pasar.objects.all()
@@ -222,6 +233,8 @@ def delete_pasar(request,id):
     pasarobj = models.pasar.objects.get(id_pasar = id)
     pasarobj.delete()
     return redirect('pasar')
+
+# KOMODITAS
 
 def komoditas(request):
     komoditasobj = models.komoditas.objects.all()
@@ -277,6 +290,8 @@ def delete_komoditas(request, id):
     komoditasobj.delete()
     return redirect('komoditas')
 
+# TRANSAKSI LAIN
+
 @login_required
 def transaksi_lain(request):
     transaksi_lain_all = models.transaksi_lain.objects.all()
@@ -327,12 +342,15 @@ def delete_transaksi_lain(request,id):
     transaksi_lain_all.delete()
     return redirect('transaksilain')
 
+# PANEN
+
 @login_required
 def panen(request):
     allpanenobj = models.panen.objects.all()
     return render(request, 'panen/panen.html', {
         "allpanenobj" : allpanenobj
         })
+
 
 @login_required
 def create_panen(request, id):
@@ -345,7 +363,7 @@ def create_panen(request, id):
         models.panen,
         models.detail_panen,
         fields=('id_komoditas', 'jumlah', 'tanggalkadaluwarsa'),
-        extra=2,
+        extra=10,
         can_delete=True,
         widgets={
             'tanggalkadaluwarsa': DateInput(attrs={'type': 'date'})
@@ -366,60 +384,32 @@ def create_panen(request, id):
                 panen_instance = models.panen.objects.create(id_mitra=mitraobj, tanggal_panen=datetime.now())
                 formset.instance = panen_instance
                 formset.save()
-            return redirect('panen')
+            return redirect('detailpanen')
 
     context = {'formset': formset}
-    return render(request, 'panen/createpanen.html', context)
+    return render(request, 'detailpanen/createdetailpanen.html', context)
 
+@login_required
+def ubah_panen(request, id):
+    OrderFormSet = inlineformset_factory(models.panen, 
+                                        models.detail_panen,
+                                        fields=('id_komoditas', 'jumlah', 'tanggalkadaluwarsa'),
+                                        widgets={
+                                                'tanggalkadaluwarsa': DateInput(attrs={'type': 'date'})
+                                                },
+                                        extra=1
+                                        )
 
-
-
-
-
-
-
-
-
-# def create_panen(request, id):
-#     if request.method == 'GET':
-#         mitraobj = models.mitra.objects.get(id_mitra=id)
-#         return render(request, 'panen/createpanen.html', {
-#             'mitraobj': mitraobj
-#         })
-
-#     elif request.method == "POST":
-#         tanggal_panen= datetime.now()
-
-#         newpanen = models.panen.objects.create(
-#             id_mitra_id=id,
-#             tanggal_panen=tanggal_panen
-#         )
-
-#         return redirect('panen')
-
-# def create_detailpanen(request, id):
-
-
-#     OrderFormSet = inlineformset_factory(
-#         models.panen,
-#         models.detail_panen,
-#         fields = ('id_komoditas', 'jumlah', 'tanggalkadaluwarsa'),
-#         extra=2,
-#         can_delete=True,
-#     widgets={
-#         'tanggalkadaluwarsa': DateInput(attrs={'type': 'date'})
-#     }
-#         )
-#     panen = models.panen.objects.get(id_panen = id)
-#     formset = OrderFormSet (instance = panen)
-#     if request.method == 'POST':
-#         formset = OrderFormSet (request.POST, instance = panen)
-#         if formset.is_valid():  
-#             formset.save()
-#             return redirect('panen')
-#     context = {'formset' : formset}
-#     return render (request, 'detailpanen/createdetailpanen.html', context)
-
+    panen= models.panen.objects.get(id_panen = id)
+    formset = OrderFormSet (instance = panen)
+    if request.method == 'POST':
+        formset = OrderFormSet (request.POST, instance = panen)
+        if formset.is_valid():  
+            formset.save()
+            return redirect('ubahdetailpanen', id=panen.id_panen, )
+        
+    context = {'formset' : formset}
+    return render (request, 'detailpanen/ubahdetailpanen.html', context)
 
 @login_required
 def update_panen(request, id):
@@ -454,3 +444,104 @@ def detailpanen(request):
     return render(request, 'detailpanen/detailpanen.html', {
         "alldetailpanenobj" : alldetailpanenobj
         })
+
+# PENJUALAN 
+
+@login_required
+def penjualan(request):
+    penjualanobj = models.penjualan.objects.all()
+    return render (request, 'penjualan/penjualan.html',{
+        'penjualanobj' : penjualanobj
+    })
+
+def detail_penjualan_komoditas(request):
+    detailpenjualanobj = models.detail_penjualan.objects.exclude(id_komoditas=None)
+    return render(request, 'detailpenjualan/detailpenjualan_komoditas.html', {
+        'detailpenjualanobj': detailpenjualanobj
+    })
+
+def detail_penjualan_produk(request):
+    detailpenjualanobj = models.detail_penjualan.objects.exclude(id_produk=None)
+    return render(request, 'detailpenjualan/detailpenjualan_komoditas.html', {
+        'detailpenjualanobj': detailpenjualanobj
+    })
+def jual(request):
+    if request.method == 'GET':
+        pasarobj = models.pasar.objects.all()
+        return render(request, 'penjualan/createpenjualan.html', {
+            'datapasar' : pasarobj
+        })
+    elif request.method == 'POST':
+        id_pasar = request.POST["id_pasar"]
+        tanggal_penjualan = request.POST["tanggal_penjualan"]
+
+        newpenjualan = models.penjualan.objects.create(
+            id_pasar_id = id_pasar,
+            tanggal_penjualan = tanggal_penjualan
+        )
+        newid = newpenjualan.id_penjualan
+        # return redirect('penjualan')
+        return redirect('penjualan')
+
+def create_detailpenjualan_produk(request, id):
+    OrderFormSet = inlineformset_factory(
+        models.penjualan,
+        models.detail_penjualan,
+        fields=('id_produk', 'kuantitas_produk'),
+        extra=1
+    )
+    
+    penjualan_obj = models.penjualan.objects.get(id_penjualan=id)
+    
+    if request.method == 'POST':
+        formset = OrderFormSet(request.POST, instance=penjualan_obj)
+        if formset.is_valid():
+            formset.save()
+            return redirect('detailpenjualan')
+            # return redirect('createdetailpenjualan', id=penjualan_obj.id_penjualan)
+    else:
+        formset = OrderFormSet(instance=penjualan_obj)
+    
+    return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
+
+def create_detailpenjualan_komoditas(request, id):
+    OrderFormSet = inlineformset_factory(
+        models.penjualan,
+        models.detail_penjualan,
+        fields=('id_komoditas', 'kuantitas_komoditas'),
+        extra=1
+    )
+    
+    penjualan_obj = models.penjualan.objects.get(id_penjualan=id)
+    
+    if request.method == 'POST':
+        formset = OrderFormSet(request.POST, instance=penjualan_obj)
+        if formset.is_valid():
+            formset.save()
+            return redirect('createdetailpenjualan', id=penjualan_obj.id_penjualan)
+    else:
+        formset = OrderFormSet(instance=penjualan_obj)
+    
+    return render(request, 'detailpenjualan/createdetailpenjualan_komoditas.html', {'formset': formset, 'penjualan': penjualan_obj})
+
+
+
+
+
+
+
+def create_transaksi_lain(request):
+    if request.method == "GET":
+        return render (request, "transaksilain/createtransaksilain.html")
+    else:
+        jenis_transaksi = request.POST["jenis_transaksi"]
+        tanggal_transaksi = request.POST["tanggal_transaksi"]
+        biaya = request.POST["biaya"]
+
+        new_transaksi_lain = models.transaksi_lain(
+            jenis_transaksi = jenis_transaksi,
+            tanggal_transaksi = tanggal_transaksi,
+            biaya = biaya
+        )
+        new_transaksi_lain.save()
+        return redirect("transaksilain")
