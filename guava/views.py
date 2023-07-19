@@ -179,11 +179,6 @@ def home(request):
             sizes.append(pendapatan / total_pendapatan)
         print(labels)
         print(sizes)
-
-
-
-
-
         context = {
             "profitbulanan" : format_profitbulanan,
             "penjualanbulanan" : format_penjualanbulanan,
@@ -194,6 +189,13 @@ def home(request):
             'sizes' : json.dumps(sizes)
         }
         return render(request, 'index.html', context)
+
+def stockkomoditas():
+    
+    # Ambil data komoditas
+    allkomoditas = models.komoditas.objects.all()
+    alldetailpanen = models.detail_panen.objects.all()
+
 
 @login_required
 def logoutview(request):
