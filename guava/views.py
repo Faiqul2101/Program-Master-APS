@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from . import models
 from datetime import datetime
+import calendar
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth import login , logout, authenticate
@@ -8,7 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.forms import DateInput
 from django.db import transaction
-
+import matplotlib.pyplot as plt
+import json
 # Create your views here.
 
 #  LOGIN
@@ -17,11 +19,181 @@ def home(request):
     if not request.user.is_authenticated:
         return render(request, 'loginsiam.html')
     else:
-        mitraobj = models.mitra.objects.all()
-        jumlah_mitra = mitraobj.count()
-        return render(request, 'index.html', {
-        'jumlah_mitra' : jumlah_mitra
-    })
+        getdatabeli = models.detail_panen.objects.all()
+        getdatajual = models.detail_penjualan.objects.all()
+        
+        # DATA BULANAN
+        currentdate = datetime.now()
+        tanggalmuda = datetime.now().date().replace(day=1)
+        tanggaltua =  currentdate.replace(day=calendar.monthrange(currentdate.year,currentdate.month)[1])
+        
+        penjualanbulan = models.penjualan.objects.filter(tanggal_penjualan__range=(tanggalmuda,tanggaltua))
+        pembelianbulan = models.panen.objects.filter(tanggal_panen__range=(tanggalmuda,tanggaltua))
+        transaksibulan = models.transaksi_lain.objects.filter(tanggal_transaksi__range=(tanggalmuda,tanggaltua))
+
+        penjualansebulan_produk = []
+        penjualansebulan_komoditas = []
+        pembeliansebulan = []
+        transaksisebulan = []
+
+        for item in penjualanbulan:
+            getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
+            print('get', getdetailjual)
+            for i in getdetailjual:
+                if i.id_komoditas is not None:
+                    totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                    penjualansebulan_komoditas.append(totalpenjualan_komoditas)
+                if i.id_produk is not None:
+                    totalpenjualan_produk = i.id_produk.hargaproduk*i.kuantitas_produk
+                    penjualansebulan_produk.append(totalpenjualan_produk)
+        print(f'Total Produk: {penjualansebulan_produk} \n Total Komoditas: {penjualansebulan_komoditas}')
+        print(sum(penjualansebulan_produk))
+
+        for item in pembelianbulan:
+            getdetailbeli = models.detail_panen.objects.filter(id_panen=item.id_panen)
+            for i in getdetailbeli:
+                totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+                pembeliansebulan.append(totalpembelian)
+        print('panen ', pembeliansebulan)
+        
+        for item in transaksibulan:
+            totaltransaksi = item.biaya
+            transaksisebulan.append(totaltransaksi)
+        print(transaksisebulan)
+
+        totalpenjualanbulanan = sum(penjualansebulan_komoditas) + sum(penjualansebulan_produk)
+        totalpembelianbulanan = sum(pembeliansebulan)
+        totaltransaksibulanan = sum(transaksisebulan)
+
+        profitbulanan = totalpenjualanbulanan - totalpembelianbulanan - totaltransaksibulanan
+        if profitbulanan > 0:
+            format_profitbulanan = " {:,}".format(profitbulanan)
+        else:
+            format_profitbulanan = " Loss"
+        format_penjualanbulanan = " {:,}".format(totalpenjualanbulanan)
+
+        # DATA TAHUNAN
+        tahunmulai = datetime.now().date().replace(month=1,day=1)
+        tahunakhir = datetime.now().date().replace(month=12,day=31)
+
+        penjualantahun = models.penjualan.objects.filter(tanggal_penjualan__range=(tahunmulai,tahunakhir))
+        pembeliantahun = models.panen.objects.filter(tanggal_panen__range=(tahunmulai,tahunakhir))
+        transaksitahun = models.transaksi_lain.objects.filter(tanggal_transaksi__range=(tahunmulai,tahunakhir))
+
+        penjualansetahun_produk = []
+        penjualansetahun_komoditas = []
+        pembeliansetahun = []
+        transaksisetahun = []
+
+        for item in penjualantahun:
+            getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
+            for i in getdetailjual:
+                if i.id_komoditas is not None:
+                    totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                    penjualansetahun_komoditas.append(totalpenjualan_komoditas)
+                if i.id_produk is not None:
+                    totalpenjualan_produk = i.id_produk.hargaproduk*i.kuantitas_produk
+                    penjualansetahun_produk.append(totalpenjualan_produk)
+
+        for item in pembeliantahun:
+            getdetailbeli = models.detail_panen.objects.filter(id_panen=item.id_panen)
+            for i in getdetailbeli:
+                totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+                pembeliansetahun.append(totalpembelian)
+
+        for item in transaksitahun:
+            totaltransaksi = item.biaya
+            transaksisetahun.append(totaltransaksi)
+
+        totalpenjualantahunan = sum(penjualansetahun_komoditas) + sum(penjualansetahun_produk)
+        totalpembeliantahunan = sum(pembeliansetahun)
+        totaltransaksitahunan = sum(transaksisetahun)
+
+        profittahunan = totalpenjualantahunan - totalpembeliantahunan - totaltransaksitahunan
+        if profittahunan > 0:
+            format_profittahunan = " {:,}".format(profittahunan)
+        else:
+            format_profittahunan = " Loss"
+        format_penjualantahunan = " {:,}".format(totalpenjualantahunan)
+
+
+        # AREA CHART
+        bulanke = int(currentdate.strftime("%m"))
+        datajualperbulan = []
+
+        for perbulan in range(1, bulanke + 1):
+            tanggalmulai = datetime.now().date().replace(month=perbulan, day=1)
+            tanggalakhir = currentdate.replace(
+                month=perbulan, day=calendar.monthrange(currentdate.year, perbulan)[1]
+            )
+            penjualanperbulan = models.penjualan.objects.filter(
+                tanggal_penjualan__range=(tanggalmulai, tanggalakhir)
+            )
+            jualperbulanan_komoditas = []
+            jualperbulanan_produk = []
+            for item in penjualanperbulan:
+                getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
+                for i in getdetailjual:
+                    if i.id_komoditas is not None:
+                        totalpenjualan_komoditas = i.id_komoditas.harga_jual * i.kuantitas_komoditas
+                        jualperbulanan_komoditas.append(totalpenjualan_komoditas)
+                    if i.id_produk is not None:
+                        totalpenjualan_produk = i.id_produk.hargaproduk * i.kuantitas_produk
+                        jualperbulanan_produk.append(totalpenjualan_produk)
+            totalperbulan_komoditas = sum(jualperbulanan_komoditas)
+            totalperbulan_produk = sum(jualperbulanan_produk)
+            datajualperbulan.append(totalperbulan_komoditas + totalperbulan_produk)
+            
+        print(datajualperbulan)
+
+        # PIE CHART
+        pasar_pendapatan = {}
+        alldetailjual = models.detail_penjualan.objects.all()
+
+        for item in alldetailjual:
+            id_pasar = item.id_penjualan.id_pasar_id
+            pendapatan = 0
+            
+            if item.id_produk:
+                produk = models.produk.objects.get(id_produk=item.id_produk_id)
+                pendapatan += produk.hargaproduk * item.kuantitas_produk
+            elif item.id_komoditas:
+                komoditas = models.komoditas.objects.get(id_komoditas=item.id_komoditas_id)
+                pendapatan += komoditas.harga_jual * item.kuantitas_komoditas
+            
+            if id_pasar in pasar_pendapatan:
+                pasar_pendapatan[id_pasar] += pendapatan
+            else:
+                pasar_pendapatan[id_pasar] = pendapatan
+
+        # Menghitung total pendapatan
+        total_pendapatan = sum(pasar_pendapatan.values())
+
+        # Membuat pie chart
+        labels = []
+        sizes = []
+
+        for pasar_id, pendapatan in pasar_pendapatan.items():
+            pasar = models.pasar.objects.get(id_pasar=pasar_id)
+            labels.append(pasar.nama_pasar)
+            sizes.append(pendapatan / total_pendapatan)
+        print(labels)
+        print(sizes)
+
+
+
+
+
+        context = {
+            "profitbulanan" : format_profitbulanan,
+            "penjualanbulanan" : format_penjualanbulanan,
+            "penjualantahunan" : format_penjualantahunan,
+            "profittahunan" : format_profittahunan,
+            "datajualperbulan_json" : json.dumps(datajualperbulan),
+            'labels' : json.dumps(labels),
+            'sizes' : json.dumps(sizes)
+        }
+        return render(request, 'index.html', context)
 
 @login_required
 def logoutview(request):
@@ -462,7 +634,7 @@ def detail_penjualan_komoditas(request):
 
 def detail_penjualan_produk(request):
     detailpenjualanobj = models.detail_penjualan.objects.exclude(id_produk=None)
-    return render(request, 'detailpenjualan/detailpenjualan_komoditas.html', {
+    return render(request, 'detailpenjualan/detailpenjualan_produk.html', {
         'detailpenjualanobj': detailpenjualanobj
     })
 def jual(request):
@@ -490,20 +662,22 @@ def create_detailpenjualan_produk(request, id):
         fields=('id_produk', 'kuantitas_produk'),
         extra=1
     )
-    
+
     penjualan_obj = models.penjualan.objects.get(id_penjualan=id)
-    
+
     if request.method == 'POST':
         formset = OrderFormSet(request.POST, instance=penjualan_obj)
         if formset.is_valid():
+            # for form in formset:
+            #     kuantitas_komoditas = form.cleaned_data.get('kuantitas_komoditas')
+            #     if kuantitas_komoditas is None:
+            #         form.instance.kuantitas_komoditas = 0
             formset.save()
-            return redirect('detailpenjualan')
-            # return redirect('createdetailpenjualan', id=penjualan_obj.id_penjualan)
+            return redirect('detailpenjualan_produk')
     else:
         formset = OrderFormSet(instance=penjualan_obj)
-    
-    return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
 
+    return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
 def create_detailpenjualan_komoditas(request, id):
     OrderFormSet = inlineformset_factory(
         models.penjualan,
@@ -517,8 +691,12 @@ def create_detailpenjualan_komoditas(request, id):
     if request.method == 'POST':
         formset = OrderFormSet(request.POST, instance=penjualan_obj)
         if formset.is_valid():
+            # for form in formset:
+            #     kuantitas_produk = form.cleaned_data.get('kuantitas_produk')
+            #     if kuantitas_produk is None:
+            #         form.instance.kuantitas_produk = 0
             formset.save()
-            return redirect('createdetailpenjualan', id=penjualan_obj.id_penjualan)
+            return redirect('detailpenjualan_komoditas')
     else:
         formset = OrderFormSet(instance=penjualan_obj)
     

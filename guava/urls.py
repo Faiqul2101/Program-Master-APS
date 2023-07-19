@@ -65,7 +65,7 @@ urlpatterns = [
     path('detailpenjualan1', views.detail_penjualan_komoditas,name='detailpenjualan_komoditas'),
     path('detailpenjualan2', views.detail_penjualan_produk,name='detailpenjualan_produk'),
     # path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan, name='createdetailpenjualan'),
-    path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan_produk, name='createdetailpenjualan_produk'),
-    path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan_komoditas, name='createdetailpenjualan_komoditas'),
+    path('detailpenjualan/createdetailpenjualan_produk/<int:id>/', views.create_detailpenjualan_produk, name='createdetailpenjualan_produk'),
+    path('detailpenjualan/createdetailpenjualan_komoditas/<int:id>/', views.create_detailpenjualan_komoditas, name='createdetailpenjualan_komoditas'),
 
     ]
