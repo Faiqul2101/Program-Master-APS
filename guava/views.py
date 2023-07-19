@@ -190,11 +190,7 @@ def home(request):
         }
         return render(request, 'index.html', context)
 
-def stockkomoditas():
-    
-    # Ambil data komoditas
-    allkomoditas = models.komoditas.objects.all()
-    alldetailpanen = models.detail_panen.objects.all()
+
 
 
 @login_required
