@@ -395,6 +395,7 @@
                                             <th>Nama Produk</th>
                                             <th>Satuan Produk</th>
                                             <th>Harga Produk</th>
+                                            <th>Stok Produk</th>
                                             <th>Action</th>        
                                         </tr>
                                     </thead>
@@ -405,6 +406,7 @@
                                             <td>{{ item.namaproduk  }}</td>
                                             <td>{{ item.satuanproduk }}</td>
                                             <td>{{ item.hargaproduk }}</td>
+                                            <td>{{ item.stok_produk }}</td>
                                             <td>
                                                 <a href="{% url 'updateproduk' item.id_produk %}"><button class="btn btn-warning">Update</button></a>
                                                 <a href="{% url 'deleteproduk' item.id_produk%}"><button class="btn btn-danger">Delete</button></a>

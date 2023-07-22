@@ -11,8 +11,12 @@ from django.forms import DateInput
 from django.db import transaction
 import matplotlib.pyplot as plt
 import json
+from django.core.exceptions import ValidationError
 # Create your views here.
-
+komoditas_to_produk_mapping = {
+        'Jambu Kristal': ('Pastry', 3),
+        'Cale': ('Keripik Cale', 4),
+    }
 #  LOGIN
 @login_required
 def home(request):
@@ -190,8 +194,6 @@ def home(request):
         }
         return render(request, 'index.html', context)
 
-# adsaasd
-
 
 @login_required
 def logoutview(request):
@@ -338,6 +340,42 @@ def create_produk(request):
         ).save()
         return redirect('produk')
 
+def olah_produk(request):
+    # Dictionary to map komoditas names to corresponding produk names and multipliers
+    komoditas_to_produk_mapping = {
+        'Jambu Kristal': ('Pastry', 3),
+        'Cale': ('Keripik Cale', 4),
+    }
+    # detailpanenobj = models.detail_panen.objects.get(id_detailpanen = id)
+    komoditas_olah = models.komoditas.objects.filter(id_grade__nama_grade='Olah')
+    detail_panen_olah = models.detail_panen.objects.filter(id_komoditas__id_grade__nama_grade = "Olah")
+    
+    panenolah = []
+
+    for item in detail_panen_olah:
+        getkomoditas = models.komoditas.objects.get(id_komoditas = item.id_komoditas)
+        panenolah.append(item.jumlah)
+
+    totalpanenolah = sum(panenolah)
+    print(panenolah)
+    print(totalpanenolah)
+    return HttpResponse()
+    # if request.method == "GET":
+    #     context = { 
+    #         "detail_panen_olah" : detail_panen_olah
+    #     }
+    #     print(detail_panen_olah)
+    #     return render(request, "olahproduk.html", context)
+    # else:
+    #     jumlah_olah = request.POST["jumlah"]
+    #     if jumlah_olah > detailpanenobj.jumlah:
+    #         raise ValidationError('Jumlah Yang Diinputkan melebihi stok yang tersedia.')
+    #     else: 
+    #         detailpanenobj.jumlah = detailpanenobj.jumlah - jumlah_olah
+    #         detailpanenobj.save()
+
+
+
 @login_required
 def update_produk(request,id):
     produkobj = models.produk.objects.get(id_produk=id)
@@ -404,13 +442,23 @@ def delete_pasar(request,id):
     pasarobj.delete()
     return redirect('pasar')
 
-# KOMODITAS
 
 def komoditas(request):
-    komoditasobj = models.komoditas.objects.all()
-    return render(request, 'komoditas/komoditas.html', {
-        'komoditasobj' : komoditasobj
-    } )
+    all_komoditas = models.komoditas.objects.all()
+    stok_per_komoditas = []
+
+    for komoditas_obj in all_komoditas:
+        stok_tersedia = komoditas_obj.get_stok_tersedia()
+        stok_per_komoditas.append({
+            'komoditas': komoditas_obj,
+            'stok_tersedia': stok_tersedia
+        })
+
+    context = {
+        'stok_per_komoditas': stok_per_komoditas
+    }
+
+    return render(request, 'komoditas/komoditas.html', context)
 
 def create_komoditas(request):
     if request.method == 'GET':
@@ -553,7 +601,26 @@ def create_panen(request, id):
             with transaction.atomic():
                 panen_instance = models.panen.objects.create(id_mitra=mitraobj, tanggal_panen=datetime.now())
                 formset.instance = panen_instance
+                komoditas_to_produk_mapping = {
+                    'Jambu Kristal': ('Pastry', 3),
+                    'Cale': ('Keripik Cale', 4),
+                }
+
+                for form in formset:
+                    id_komoditas = form.cleaned_data.get('id_komoditas')
+                    if id_komoditas:
+                        komoditas_obj = models.komoditas.objects.get(id_komoditas=id_komoditas.id_komoditas)
+                        if komoditas_obj.id_grade.nama_grade == 'Olah' and komoditas_obj.nama_komoditas in komoditas_to_produk_mapping:
+                            produk_name, multiplier = komoditas_to_produk_mapping[komoditas_obj.nama_komoditas]
+                            try:
+                                existing_produk = models.produk.objects.get(namaproduk=produk_name)
+                                stok_tersedia = komoditas_obj.get_stok_tersedia()
+                                existing_produk.stok_produk = stok_tersedia * multiplier
+                                existing_produk.save()
+                            except models.produk.DoesNotExist:
+                                pass
                 formset.save()
+                # Update stok_produk for "Olah" komoditas
             return redirect('detailpanen')
 
     context = {'formset': formset}
@@ -610,9 +677,11 @@ def delete_panen(request,id):
 @login_required
 def detailpanen(request):
     alldetailpanenobj = models.detail_panen.objects.all()
+    detailpanen_olah = models.detail_panen.objects.filter(id_komoditas__id_grade__nama_grade = "Olah")
     print(alldetailpanenobj)
     return render(request, 'detailpanen/detailpanen.html', {
-        "alldetailpanenobj" : alldetailpanenobj
+        "alldetailpanenobj" : alldetailpanenobj,
+        'detailpanen_olah' : detailpanen_olah
         })
 
 # PENJUALAN 
@@ -660,22 +729,53 @@ def create_detailpenjualan_produk(request, id):
         fields=('id_produk', 'kuantitas_produk'),
         extra=1
     )
-
+    
     penjualan_obj = models.penjualan.objects.get(id_penjualan=id)
-
+    
     if request.method == 'POST':
         formset = OrderFormSet(request.POST, instance=penjualan_obj)
         if formset.is_valid():
-            # for form in formset:
-            #     kuantitas_komoditas = form.cleaned_data.get('kuantitas_komoditas')
-            #     if kuantitas_komoditas is None:
-            #         form.instance.kuantitas_komoditas = 0
-            formset.save()
-            return redirect('detailpenjualan_produk')
+            try:
+                with transaction.atomic():
+                    for form in formset:
+                        if form.instance.pk is None:
+                            # Form baru, lakukan pengurangan stok
+                            id_produk = form.cleaned_data.get('id_produk')
+                            kuantitas_komoditas = form.cleaned_data.get('kuantitas_produk')
+                            if id_produk and kuantitas_komoditas:
+                                produk_obj = models.produk.objects.get(id_produk=id_produk.id_produk)
+                                print(f'produk : {produk_obj}')
+                                stok_tersedia = produk_obj.stok_produk
+                                print('stock', stok_tersedia)
+                                if kuantitas_komoditas > stok_tersedia:
+                                    form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
+                                    raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
+                                else:
+                                    detail_penjualan_obj = form.save(commit=False)
+                                    detail_penjualan_obj.id_penjualan = penjualan_obj
+                                    detail_penjualan_obj.save()
+
+                                    stok_baru = stok_tersedia - kuantitas_komoditas
+                                    produk_obj.stok_produk = stok_baru
+                                    print(f'stok {produk_obj.stok_produk}')
+                                    produk_obj.save()
+                        else:
+                            # Form yang telah ada dalam database, cukup simpan tanpa pengurangan stok
+                            form.save()
+
+                return redirect('detailpenjualan_produk')
+            except ValidationError as e:
+                # Tangkap ValidationError dan tambahkan kesalahan ke form individu dalam formset
+                for form in formset:
+                    if form.has_error('kuantitas_produk'):
+                        form.add_error('kuantitas_produk', e)
     else:
         formset = OrderFormSet(instance=penjualan_obj)
 
     return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
+
+
+
 def create_detailpenjualan_komoditas(request, id):
     OrderFormSet = inlineformset_factory(
         models.penjualan,
@@ -689,16 +789,35 @@ def create_detailpenjualan_komoditas(request, id):
     if request.method == 'POST':
         formset = OrderFormSet(request.POST, instance=penjualan_obj)
         if formset.is_valid():
-            # for form in formset:
-            #     kuantitas_produk = form.cleaned_data.get('kuantitas_produk')
-            #     if kuantitas_produk is None:
-            #         form.instance.kuantitas_produk = 0
-            formset.save()
-            return redirect('detailpenjualan_komoditas')
+            try:
+                with transaction.atomic():
+                    for form in formset:
+                        id_komoditas = form.cleaned_data.get('id_komoditas')
+                        kuantitas_komoditas = form.cleaned_data.get('kuantitas_komoditas')
+                        if id_komoditas and kuantitas_komoditas:
+                            komoditas_obj = models.komoditas.objects.get(id_komoditas=id_komoditas.id_komoditas)
+                            stok_tersedia = komoditas_obj.get_stok_tersedia()
+                            if kuantitas_komoditas > stok_tersedia:
+                                form.add_error('kuantitas_komoditas', 'Jumlah komoditas melebihi stok yang tersedia.')
+                                raise ValidationError('Jumlah komoditas melebihi stok yang tersedia.')
+                            else:
+                                
+                                detail_penjualan_obj = form.save(commit=False)
+                                detail_penjualan_obj.id_penjualan = penjualan_obj
+                                detail_penjualan_obj.save()
+
+                return redirect('detailpenjualan_komoditas')
+            except ValidationError as e:
+                # Tangkap ValidationError dan tambahkan kesalahan ke form individu dalam formset
+                for form in formset:
+                    if form.has_error('kuantitas_komoditas'):
+                        form.add_error('kuantitas_komoditas', e)
     else:
         formset = OrderFormSet(instance=penjualan_obj)
     
     return render(request, 'detailpenjualan/createdetailpenjualan_komoditas.html', {'formset': formset, 'penjualan': penjualan_obj})
+
+
 
 
 

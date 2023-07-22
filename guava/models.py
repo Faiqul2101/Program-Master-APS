@@ -29,6 +29,21 @@ class grade(models.Model):
 
     def __str__(self):
         return str(self.nama_grade)
+    
+class produk(models.Model):
+    id_produk = models.AutoField(primary_key=True)
+    namaproduk = models.CharField(max_length=15)
+    satuanproduk = models.CharField(max_length=15)
+    hargaproduk = models.IntegerField()
+    stok_produk = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return str(self.namaproduk)
+
+    # def get_stok_tersedia_produk(self):
+    #     total_terjual = sum(detail_penjualan_obj.kuantitas_produk for detail_penjualan_obj in self.detail_penjualan_set.all())
+    #     self.stok_produk -= total_terjual
+    #     return self.stok_produk
 
 class komoditas(models.Model):
     id_komoditas = models.AutoField(primary_key=True)
@@ -39,8 +54,18 @@ class komoditas(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.nama_komoditas, self.id_grade)
-
-
+    
+    def get_stok_tersedia(self):
+        total_stok = sum(detail_panen_obj.jumlah for detail_panen_obj in self.detail_panen_set.all())
+        total_terjual = sum(detail_penjualan_obj.kuantitas_komoditas for detail_penjualan_obj in self.detail_penjualan_set.all())
+        stok_tersedia = total_stok - total_terjual if total_stok >= total_terjual else 0
+        return stok_tersedia
+    
+    def kurangi_stok(self, jumlah_dikurangi):
+        stok_tersedia = self.get_stok_tersedia()
+        if stok_tersedia >= jumlah_dikurangi:
+            self.total_stok -= jumlah_dikurangi
+            self.save()
 class detail_panen(models.Model):
     id_detailpanen = models.AutoField(primary_key=True)
     id_panen = models.ForeignKey(panen, on_delete=models.CASCADE)
@@ -51,14 +76,10 @@ class detail_panen(models.Model):
     def __str__(self):
         return str(self.id_panen)
     
-class produk(models.Model):
-    id_produk = models.AutoField(primary_key=True)
-    namaproduk = models.CharField(max_length=15)
-    satuanproduk = models.CharField(max_length=15)
-    hargaproduk = models.IntegerField()
+    def get_total_stok(self):
+        return self.jumlah
+    
 
-    def __str__(self):
-        return str(self.namaproduk)
 
 class pasar(models.Model):
     id_pasar = models.AutoField(primary_key=True)
@@ -86,6 +107,9 @@ class detail_penjualan(models.Model):
 
     def __str__(self):
         return str(self.id_penjualan)
+    
+    def get_total_terjual(self):
+        return self.kuantitas_komoditas
     
 class transaksi_lain(models.Model):
     id_transaksi = models.AutoField(primary_key=True)

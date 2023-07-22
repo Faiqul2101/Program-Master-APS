@@ -397,20 +397,23 @@
                                             <th>Grade</th>
                                             <th>Harga Beli</th>
                                             <th>Harga Jual</th>
+                                            <th>Stok</th>
                                             <th>Action</th>        
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in komoditasobj %}
+                                        <tr></tr>
+                                        {% for item in stok_per_komoditas %}
                                         <tr>
-                                            <td>{{ item.id_komoditas  }}</td>
-                                            <td>{{ item.nama_komoditas  }}</td>
-                                            <td>{{ item.id_grade  }}</td>
-                                            <td>{{ item.harga_beli  }}</td>
-                                            <td>{{ item.harga_jual  }}</td>
+                                            <td>{{ item.komoditas.id_komoditas  }}</td>
+                                            <td>{{ item.komoditas.nama_komoditas  }}</td>
+                                            <td>{{ item.komoditas.id_grade  }}</td>
+                                            <td>{{ item.komoditas.harga_beli  }}</td>
+                                            <td>{{ item.komoditas.harga_jual  }}</td>
+                                            <td>{{item.stok_tersedia}}</td>
                                             <td>
-                                                <a href="{% url 'updatekomoditas' item.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'deletekomoditas' item.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>
+                                                <a href="{% url 'updatekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'deletekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
                                         </tr>
                                         {% endfor %}

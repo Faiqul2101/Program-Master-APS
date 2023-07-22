@@ -411,6 +411,11 @@
                                             <td>{{ item.jumlah}}</td>
                                             <td>{{item.id_panen.tanggal_panen}}</td>
                                             <td>{{ item.tanggalkadaluwarsa}}</td>
+                                            {% if item in detailpanen_olah%}
+                                            <td>
+                                                <a href="{% url 'olahproduk'  %}"><button class="btn btn-info">Olah</button></a>
+                                            </td>
+                                            {% endif %}
                                             
                                         </tr>
                                         {% endfor %}

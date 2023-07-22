@@ -440,38 +440,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for item in mitraobj %}
+                                        {% for item in detail_panen_olah %}
                                         <tr>
-                                            <td>{{ item.id_mitra  }}</td>
-                                            <td>{{ item.nama_mitra  }}</td>
-                                            <td>{{ item.alamat_mitra }}</td>
-                                            <td>{{ item.nomor_mitra }}</td>
-                                            <td>{{ item.tanggal_mulai_mitra }}</td>
-                                            <td>{{ item.durasi_kontrak }}</td>
-                                            <td>{{ item.luas_lahan }}</td>
-                                            <td>
-                                                {% if item.status_mitra == True %}
-                                                Terdaftar
-                                                {% elif item.status_mitra == False %}
-                                                Tidak Terdaftar
-                                                {% else %}
-                                                    On Progress
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'updatemitra' item.id_mitra %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'deletemitra' item.id_mitra  %}"><button class="btn btn-danger">Delete</button></a>
-                                            </td>
-                                            {% if item.status_mitra == True %}
-                                            <td>
-                                                <a href="{% url 'createpanen' item.id_mitra  %}"><button class="btn-custom">Panen</button></a>
-                                            </td>
-                                            {%endif%}
-                                            {% if item.status_mitra == None %}
-                                            <td>  
-                                                <a href="{% url 'validasimitra' item.id_mitra %}"><button class="btn btn-success">Validasi</button></a>
-                                            </td>  
-                                            {%endif%}
+                                            <td>{{ item.id_komoditas  }}</td>
+                                            <td>{{ item.jumlah }}</td>
+                                            
+                                            
+                                            
                                         </tr>
                                         {% endfor %}
                                     </tbody>

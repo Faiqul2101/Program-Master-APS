@@ -26,6 +26,7 @@ urlpatterns = [
     path('produk/createproduk', views.create_produk,name='createproduk'),
     path('produk/updateproduk/<str:id>', views.update_produk,name='updateproduk'),
     path('deleteproduk/<str:id>', views.delete_produk,name='deleteproduk'),
+    path('olahproduk', views.olah_produk,name='olahproduk'),
 
     # PASAR
     path('pasar/', views.pasar,name='pasar'),
