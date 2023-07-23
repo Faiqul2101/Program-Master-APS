@@ -51,21 +51,26 @@ class komoditas(models.Model):
     nama_komoditas = models.CharField(max_length=50)
     harga_beli = models.IntegerField()
     harga_jual = models.IntegerField()
+    stok = 0
 
     def __str__(self):
         return "{} - {}".format(self.nama_komoditas, self.id_grade)
     
     def get_stok_tersedia(self):
+        global stok_tersedia
         total_stok = sum(detail_panen_obj.jumlah for detail_panen_obj in self.detail_panen_set.all())
         total_terjual = sum(detail_penjualan_obj.kuantitas_komoditas for detail_penjualan_obj in self.detail_penjualan_set.all())
         stok_tersedia = total_stok - total_terjual if total_stok >= total_terjual else 0
+        
         return stok_tersedia
     
     def kurangi_stok(self, jumlah_dikurangi):
-        stok_tersedia = self.get_stok_tersedia()
-        if stok_tersedia >= jumlah_dikurangi:
+        a = stok_tersedia
+        stok_tersediaa = self.get_stok_tersedia()
+        if stok_tersediaa >= jumlah_dikurangi:
             self.total_stok -= jumlah_dikurangi
-            self.save()
+            
+
 class detail_panen(models.Model):
     id_detailpanen = models.AutoField(primary_key=True)
     id_panen = models.ForeignKey(panen, on_delete=models.CASCADE)

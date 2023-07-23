@@ -410,7 +410,7 @@
                                             <td>{{ item.komoditas.id_grade  }}</td>
                                             <td>{{ item.komoditas.harga_beli  }}</td>
                                             <td>{{ item.komoditas.harga_jual  }}</td>
-                                            <td>{{item.stok_tersedia}}</td>
+                                            <td>{{item.stok}}</td>
                                             <td>
                                                 <a href="{% url 'updatekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
                                                 <a href="{% url 'deletekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>

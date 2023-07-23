@@ -14,9 +14,13 @@ import json
 from django.core.exceptions import ValidationError
 # Create your views here.
 komoditas_to_produk_mapping = {
-        'Jambu Kristal': ('Pastry', 3),
-        'Cale': ('Keripik Cale', 4),
+        'Pastry': ('Jambu Kristal', 0.33),
+        'Keripik Cale': ('Cale', 0.25),
     }
+# komoditas_to_produk_mapping = {
+#         'Jambu Kristal': ('Pastry', 3),
+#         'Cale': ('Keripik Cale', 4),
+#     }
 #  LOGIN
 @login_required
 def home(request):
@@ -444,21 +448,33 @@ def delete_pasar(request,id):
 
 
 def komoditas(request):
-    all_komoditas = models.komoditas.objects.all()
-    stok_per_komoditas = []
+    allkomoditasobj = models.komoditas.objects.all()
+    komoditasnon = models.komoditas.objects.exclude(id_grade__nama_grade="Olah")
+    komoditasolah = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
+    stok_nonolah = coba(komoditasnon)
+    stok_olah = cobaproduk(komoditasolah)
+    stok_list = []
 
-    for komoditas_obj in all_komoditas:
-        stok_tersedia = komoditas_obj.get_stok_tersedia()
-        stok_per_komoditas.append({
-            'komoditas': komoditas_obj,
-            'stok_tersedia': stok_tersedia
+    for i in allkomoditasobj:
+        # Ambil stok dari stok_olah jika komoditas memiliki grade "Olah"
+        # atau dari stok_nonolah jika komoditas memiliki grade selain "Olah"
+        if i.id_grade.nama_grade == "Olah":
+            stok = next((item['stok'] for item in stok_olah if item['komoditas'] == i.nama_komoditas), 0)
+        else:
+            stok = next((item['stok'] for item in stok_nonolah if item['komoditas'] == i.nama_komoditas), 0)
+
+        stok_list.append({
+            'komoditas': i,
+            'stok': stok
         })
 
-    context = {
-        'stok_per_komoditas': stok_per_komoditas
-    }
+    print(stok_list)  # Output untuk verifikasi di terminal atau console
 
-    return render(request, 'komoditas/komoditas.html', context)
+    return render(request, 'komoditas/komoditas.html', {
+        'stok_per_komoditas': stok_list
+    })
+
+    # return HttpResponse(f'stok olah : {stok_olah} \n Stok non : {stok_nonolah}')
 
 def create_komoditas(request):
     if request.method == 'GET':
@@ -737,43 +753,48 @@ def create_detailpenjualan_produk(request, id):
         if formset.is_valid():
             try:
                 with transaction.atomic():
+                    stok_komoditas_olah = cobaproduk(models.komoditas.objects.filter(id_grade__nama_grade="Olah"))
+                    stok_dict = {item['komoditas']: item['stok'] for item in stok_komoditas_olah}
+
                     for form in formset:
-                        if form.instance.pk is None:
-                            # Form baru, lakukan pengurangan stok
-                            id_produk = form.cleaned_data.get('id_produk')
-                            kuantitas_komoditas = form.cleaned_data.get('kuantitas_produk')
-                            if id_produk and kuantitas_komoditas:
-                                produk_obj = models.produk.objects.get(id_produk=id_produk.id_produk)
-                                print(f'produk : {produk_obj}')
-                                stok_tersedia = produk_obj.stok_produk
-                                print('stock', stok_tersedia)
-                                if kuantitas_komoditas > stok_tersedia:
-                                    form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
-                                    raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
-                                else:
+                        id_produk = form.cleaned_data.get('id_produk')
+                        kuantitas_komoditas = form.cleaned_data.get('kuantitas_produk')
+                        if id_produk and kuantitas_komoditas:
+                            produk_obj = models.produk.objects.get(id_produk=id_produk.id_produk)
+
+                            if produk_obj.namaproduk in komoditas_to_produk_mapping:
+                                komoditas_grade_olah, factor = komoditas_to_produk_mapping[produk_obj.namaproduk]
+
+                                # Calculate the quantity of commodity produced based on the sales of the product
+                                produced_commodity_quantity = kuantitas_komoditas * factor
+
+                                # Check if the stock of the related processed commodity is sufficient
+                                if komoditas_grade_olah in stok_dict and stok_dict[komoditas_grade_olah] >= produced_commodity_quantity:
                                     detail_penjualan_obj = form.save(commit=False)
                                     detail_penjualan_obj.id_penjualan = penjualan_obj
                                     detail_penjualan_obj.save()
 
-                                    stok_baru = stok_tersedia - kuantitas_komoditas
-                                    produk_obj.stok_produk = stok_baru
-                                    print(f'stok {produk_obj.stok_produk}')
-                                    produk_obj.save()
-                        else:
-                            # Form yang telah ada dalam database, cukup simpan tanpa pengurangan stok
-                            form.save()
+                                    # Update the stock quantity of the related processed commodity
+                                    stok_dict[komoditas_grade_olah] -= produced_commodity_quantity
+                                else:
+                                    form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
+                                    raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
+
+                            else:
+                                form.add_error('id_produk', 'Produk tidak ada dalam daftar pemetaan komoditas.')
+                                raise ValidationError('Produk tidak ada dalam daftar pemetaan komoditas.')
 
                 return redirect('detailpenjualan_produk')
             except ValidationError as e:
                 # Tangkap ValidationError dan tambahkan kesalahan ke form individu dalam formset
                 for form in formset:
-                    if form.has_error('kuantitas_produk'):
-                        form.add_error('kuantitas_produk', e)
+                    if form.has_error('kuantitas_produk') or form.has_error('id_produk'):
+                        form.add_error(None, e)
+
     else:
         formset = OrderFormSet(instance=penjualan_obj)
 
     return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
-
 
 
 def create_detailpenjualan_komoditas(request, id):
@@ -796,12 +817,12 @@ def create_detailpenjualan_komoditas(request, id):
                         kuantitas_komoditas = form.cleaned_data.get('kuantitas_komoditas')
                         if id_komoditas and kuantitas_komoditas:
                             komoditas_obj = models.komoditas.objects.get(id_komoditas=id_komoditas.id_komoditas)
-                            stok_tersedia = komoditas_obj.get_stok_tersedia()
-                            if kuantitas_komoditas > stok_tersedia:
+                            stok_tersedia = coba([komoditas_obj])
+                            stok_tersedia_komoditas = stok_tersedia[0]['stok']
+                            if kuantitas_komoditas > stok_tersedia_komoditas:
                                 form.add_error('kuantitas_komoditas', 'Jumlah komoditas melebihi stok yang tersedia.')
                                 raise ValidationError('Jumlah komoditas melebihi stok yang tersedia.')
                             else:
-                                
                                 detail_penjualan_obj = form.save(commit=False)
                                 detail_penjualan_obj.id_penjualan = penjualan_obj
                                 detail_penjualan_obj.save()
@@ -816,14 +837,6 @@ def create_detailpenjualan_komoditas(request, id):
         formset = OrderFormSet(instance=penjualan_obj)
     
     return render(request, 'detailpenjualan/createdetailpenjualan_komoditas.html', {'formset': formset, 'penjualan': penjualan_obj})
-
-
-
-
-
-
-
-
 
 def create_transaksi_lain(request):
     if request.method == "GET":
@@ -840,3 +853,75 @@ def create_transaksi_lain(request):
         )
         new_transaksi_lain.save()
         return redirect("transaksilain")
+
+def coba(obj):
+    stok_per_komoditas =[]
+    for i in obj:
+        dummy = {}
+        totalpenjualan =0
+        totalpanen =0
+        a = models.detail_penjualan.objects.filter(id_komoditas = i.id_komoditas)
+        # print('aaa',a,'aaa')
+        for x in a:
+            totalpenjualan += x.kuantitas_komoditas
+        b = models.detail_panen.objects.filter(id_komoditas=i.id_komoditas)
+        for x in b:
+            totalpanen += x.jumlah
+        totalstok = totalpanen - totalpenjualan
+        dummy['komoditas'] = i.nama_komoditas
+        dummy['stok'] = totalstok
+        stok_per_komoditas.append(dummy)
+        print(totalstok)
+    return stok_per_komoditas
+        
+
+def cobaproduk(req):
+    produkobj = models.produk.objects.all()
+    obj = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
+    stok_olah = coba(obj)
+
+    # for x in produkobj:
+    #     getdetailjual = models.detail_penjualan.objects.filter(id_produk=x.id_produk)
+    #     for s in stok_olah:
+    #         if s['komoditas'] in komoditas_to_produk_mapping:
+    #             produkolahan, factor = komoditas_to_produk_mapping[s['komoditas']]
+    #             if x.namaproduk == produkolahan:
+    #                 stok_produk = x.stok_produk
+    #                 for detail_jual in getdetailjual:
+    #                     kuantitas_produk = detail_jual.kuantitas_produk
+    #                     s['stok'] -= kuantitas_produk * (1/factor)
+
+    # Create a dictionary to store commodity stocks based on commodity name
+    stok_by_komoditas = {}
+
+    for i in produkobj:
+        getdetailjual = models.detail_penjualan.objects.filter(id_produk=i.id_produk)
+        kuantitasproduk = 0
+        for x in getdetailjual:
+            kuantitasproduk += x.kuantitas_produk
+
+        print(f"Total quantity of {i.namaproduk} sold: {kuantitasproduk}")
+
+        if i.namaproduk in komoditas_to_produk_mapping:
+            komoditas_grade_olah, factor = komoditas_to_produk_mapping[i.namaproduk]
+            komoditas_dibutuhkan = kuantitasproduk * factor
+            for z in stok_olah:
+                if z['komoditas'] == komoditas_grade_olah:
+                    z['stok'] -= komoditas_dibutuhkan
+
+
+    # Convert the stok_by_komoditas dictionary to a list of dictionaries
+    
+
+    return HttpResponse(stok_olah)
+
+    
+
+def your_view(request):
+    # obj = models.komoditas.objects.filter(id_komoditas = 2)
+    obj = models.komoditas.objects.all()
+    obj1 = models.komoditas.objects.filter(id_grade__nama_grade = "Olah")
+    listb=[]
+    stok_tersedia = coba(obj)
+    
+    return HttpResponse(f'Stok Tersedia Non: {stok_tersedia}')
