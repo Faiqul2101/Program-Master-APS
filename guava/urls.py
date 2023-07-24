@@ -68,9 +68,16 @@ urlpatterns = [
     # path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan, name='createdetailpenjualan'),
     path('detailpenjualan/createdetailpenjualan_produk/<int:id>/', views.create_detailpenjualan_produk, name='createdetailpenjualan_produk'),
     path('detailpenjualan/createdetailpenjualan_komoditas/<int:id>/', views.create_detailpenjualan_komoditas, name='createdetailpenjualan_komoditas'),
+    
+    # LAPORAN
+    path('laporan', views.laporan_laba_rugi),
+    
+    
+    
+    
+    
     path('coba',views.coba),
     # path('cobaa',views.cobaa),
-    path('u',views.your_view),
     path('q',views.cobaproduk),
 
 

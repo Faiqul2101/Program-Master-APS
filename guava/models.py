@@ -35,15 +35,9 @@ class produk(models.Model):
     namaproduk = models.CharField(max_length=15)
     satuanproduk = models.CharField(max_length=15)
     hargaproduk = models.IntegerField()
-    stok_produk = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return str(self.namaproduk)
-
-    # def get_stok_tersedia_produk(self):
-    #     total_terjual = sum(detail_penjualan_obj.kuantitas_produk for detail_penjualan_obj in self.detail_penjualan_set.all())
-    #     self.stok_produk -= total_terjual
-    #     return self.stok_produk
 
 class komoditas(models.Model):
     id_komoditas = models.AutoField(primary_key=True)

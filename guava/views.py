@@ -12,15 +12,17 @@ from django.db import transaction
 import matplotlib.pyplot as plt
 import json
 from django.core.exceptions import ValidationError
+
 # Create your views here.
+
+
 komoditas_to_produk_mapping = {
         'Pastry': ('Jambu Kristal', 0.33),
         'Keripik Cale': ('Cale', 0.25),
+        'Teh Bunga Talang': ('Bunga Talang', 0.1),
+        'Lemon Kering': ('Lemon', 0.2),
     }
-# komoditas_to_produk_mapping = {
-#         'Jambu Kristal': ('Pastry', 3),
-#         'Cale': ('Keripik Cale', 4),
-#     }
+
 #  LOGIN
 @login_required
 def home(request):
@@ -452,26 +454,13 @@ def komoditas(request):
     komoditasnon = models.komoditas.objects.exclude(id_grade__nama_grade="Olah")
     komoditasolah = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
     stok_nonolah = coba(komoditasnon)
-    stok_olah = cobaproduk(komoditasolah)
+    # stok_olah = cobaproduk(komoditasolah)
     stok_list = []
 
-    for i in allkomoditasobj:
-        # Ambil stok dari stok_olah jika komoditas memiliki grade "Olah"
-        # atau dari stok_nonolah jika komoditas memiliki grade selain "Olah"
-        if i.id_grade.nama_grade == "Olah":
-            stok = next((item['stok'] for item in stok_olah if item['komoditas'] == i.nama_komoditas), 0)
-        else:
-            stok = next((item['stok'] for item in stok_nonolah if item['komoditas'] == i.nama_komoditas), 0)
-
-        stok_list.append({
-            'komoditas': i,
-            'stok': stok
-        })
-
-    print(stok_list)  # Output untuk verifikasi di terminal atau console
-
+ 
     return render(request, 'komoditas/komoditas.html', {
-        'stok_per_komoditas': stok_list
+        'stok_per_komoditas': stok_list,
+        'allkomoditasobj' : allkomoditasobj
     })
 
     # return HttpResponse(f'stok olah : {stok_olah} \n Stok non : {stok_nonolah}')
@@ -753,9 +742,6 @@ def create_detailpenjualan_produk(request, id):
         if formset.is_valid():
             try:
                 with transaction.atomic():
-                    stok_komoditas_olah = cobaproduk(models.komoditas.objects.filter(id_grade__nama_grade="Olah"))
-                    stok_dict = {item['komoditas']: item['stok'] for item in stok_komoditas_olah}
-
                     for form in formset:
                         id_produk = form.cleaned_data.get('id_produk')
                         kuantitas_komoditas = form.cleaned_data.get('kuantitas_produk')
@@ -769,20 +755,24 @@ def create_detailpenjualan_produk(request, id):
                                 produced_commodity_quantity = kuantitas_komoditas * factor
 
                                 # Check if the stock of the related processed commodity is sufficient
-                                if komoditas_grade_olah in stok_dict and stok_dict[komoditas_grade_olah] >= produced_commodity_quantity:
-                                    detail_penjualan_obj = form.save(commit=False)
-                                    detail_penjualan_obj.id_penjualan = penjualan_obj
-                                    detail_penjualan_obj.save()
+                                stok_tersedia = cobaproduk()
+                                for stok_item in stok_tersedia:
+                                    if stok_item['komoditas'] == komoditas_grade_olah:
+                                        if stok_item['stok'] >= produced_commodity_quantity:
+                                            detail_penjualan_obj = form.save(commit=False)
+                                            detail_penjualan_obj.id_penjualan = penjualan_obj
+                                            detail_penjualan_obj.save()
 
-                                    # Update the stock quantity of the related processed commodity
-                                    stok_dict[komoditas_grade_olah] -= produced_commodity_quantity
+                                            # Update the stock quantity of the related processed commodity
+                                            stok_item['stok'] -= produced_commodity_quantity
+                                        else:
+                                            form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
+                                            raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
+                                        break
                                 else:
-                                    form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
-                                    raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
-
-                            else:
-                                form.add_error('id_produk', 'Produk tidak ada dalam daftar pemetaan komoditas.')
-                                raise ValidationError('Produk tidak ada dalam daftar pemetaan komoditas.')
+                                    # The related processed commodity was not found in the stok_tersedia list
+                                    form.add_error('id_produk', 'Produk tidak ada dalam daftar pemetaan komoditas.')
+                                    raise ValidationError('Produk tidak ada dalam daftar pemetaan komoditas.')
 
                 return redirect('detailpenjualan_produk')
             except ValidationError as e:
@@ -871,28 +861,15 @@ def coba(obj):
         dummy['komoditas'] = i.nama_komoditas
         dummy['stok'] = totalstok
         stok_per_komoditas.append(dummy)
+    
         print(totalstok)
     return stok_per_komoditas
         
 
-def cobaproduk(req):
+def cobaproduk():
     produkobj = models.produk.objects.all()
     obj = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
     stok_olah = coba(obj)
-
-    # for x in produkobj:
-    #     getdetailjual = models.detail_penjualan.objects.filter(id_produk=x.id_produk)
-    #     for s in stok_olah:
-    #         if s['komoditas'] in komoditas_to_produk_mapping:
-    #             produkolahan, factor = komoditas_to_produk_mapping[s['komoditas']]
-    #             if x.namaproduk == produkolahan:
-    #                 stok_produk = x.stok_produk
-    #                 for detail_jual in getdetailjual:
-    #                     kuantitas_produk = detail_jual.kuantitas_produk
-    #                     s['stok'] -= kuantitas_produk * (1/factor)
-
-    # Create a dictionary to store commodity stocks based on commodity name
-    stok_by_komoditas = {}
 
     for i in produkobj:
         getdetailjual = models.detail_penjualan.objects.filter(id_produk=i.id_produk)
@@ -909,19 +886,84 @@ def cobaproduk(req):
                 if z['komoditas'] == komoditas_grade_olah:
                     z['stok'] -= komoditas_dibutuhkan
 
+    return stok_olah
 
-    # Convert the stok_by_komoditas dictionary to a list of dictionaries
-    
+def laporan_laba_rugi(request):
+    if request.method == "GET":
+        return render(request,'laporan.html')
+    elif request.method == "POST":
+        mulai = request.POST['mulai']
+        akhir = request.POST['akhir']
 
-    return HttpResponse(stok_olah)
+        # PENJUALAN
+        penjualanrange = models.penjualan.objects.filter(tanggal_penjualan__range = (mulai, akhir))
 
-    
+        penjualansebulan_produk = []
+        penjualansebulan_komoditas = []
+        pembeliansebulan = []
+        transaksisebulan = []
 
-def your_view(request):
-    # obj = models.komoditas.objects.filter(id_komoditas = 2)
-    obj = models.komoditas.objects.all()
-    obj1 = models.komoditas.objects.filter(id_grade__nama_grade = "Olah")
-    listb=[]
-    stok_tersedia = coba(obj)
-    
-    return HttpResponse(f'Stok Tersedia Non: {stok_tersedia}')
+        for item in penjualanrange:
+            getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
+            print('get', getdetailjual)
+            for i in getdetailjual:
+                if i.id_komoditas is not None:
+                    totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                    penjualansebulan_komoditas.append(totalpenjualan_komoditas)
+                if i.id_produk is not None:
+                    totalpenjualan_produk = i.id_produk.hargaproduk*i.kuantitas_produk
+                    penjualansebulan_produk.append(totalpenjualan_produk)
+
+        totalpenjualan = sum(penjualansebulan_komoditas) + sum(penjualansebulan_produk)
+
+        # HPP dan BIAYA LAIN
+        pembelianrange = models.panen.objects.filter(tanggal_panen__range=(mulai,akhir))
+
+        for item in pembelianrange:
+            getdetailbeli = models.detail_panen.objects.filter(id_panen=item.id_panen)
+            for i in getdetailbeli:
+                totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+                pembeliansebulan.append(totalpembelian)
+
+        totalpanen = sum(pembeliansebulan)
+
+        transaksirange = models.transaksi_lain.objects.filter(tanggal_transaksi__range=(mulai,akhir))
+        biayahpp = ["Biaya Tenaga Kerja" , "Biaya Listrik" , "Biaya Air"]
+        biayapemasaran = 0
+        biayaadministrasi = 0
+        biayapajak = 0
+
+        for item in transaksirange:
+            if item.jenis_transaksi in biayahpp:
+                transaksisebulan.append(item.biaya)
+            elif item.jenis_transaksi == "Biaya Pemasaran":
+                biayapemasaran += item.biaya
+            elif item.jenis_transaksi == "Biaya Administrasi":
+                biayaadministrasi += item.biaya
+            elif item.jenis_transaksi == "Biaya Pajak":
+                biayapajak += item.biaya
+
+        totaltransaksi = sum(transaksisebulan)
+        totalbebanusaha = biayapemasaran + biayaadministrasi
+        totalhpp = totalpanen + totaltransaksi
+        
+        # LABA / RUGI
+        labarugi = totalpenjualan - totalhpp  
+
+        # LABA SEBELUM PAJAK
+        labasebelumpajak = labarugi -totalbebanusaha
+        
+        # LABA BERSIH
+        lababersih = labasebelumpajak - biayapajak
+
+        return render(request, 'laporanlabarugi.html', {
+            "penjualan" : totalpenjualan,
+            "hpp" : totalhpp,
+            "labarugi" : labarugi,
+            "pemasaran" : biayapemasaran,
+            "administrasi" : biayaadministrasi,
+            "totalbebanusaha": totalbebanusaha,
+            "labasebelumpajak" : labasebelumpajak,
+            "pajak" : biayapajak,
+            "lababersih" : lababersih,
+        })

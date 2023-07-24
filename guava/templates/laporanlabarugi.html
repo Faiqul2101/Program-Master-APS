@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Laporan Laba Rugi</title>
+</head>
+
+<body>
+
+    <h1>Laporan Laba Rugi</h1>
+
+    <table>
+        <tr>
+            <th>Pendapatan</th>
+            <th>Jumlah</th>
+        </tr>
+        <tr>
+            <td>Penjualan</td>
+            <td>Rp. {{ penjualan }}</td>
+        </tr>
+        <tr>
+            <td>Pendapatan Lain</td>
+            <td>Rp. 0 </td>
+        </tr>
+        <tr>
+            <th>Total Pendapatan</th>
+            <td>Rp. {{ penjualan }}</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table>
+        <tr>
+            <th>Beban Usaha</th>
+            <th>Jumlah</th>
+        </tr>
+        <tr>
+            <td>Harga Pokok Penjualan</td>
+            <td>Rp. {{ hpp }}</td>
+        </tr>
+        <tr>
+            <td>Biaya Administrasi</td>
+            <td>Rp. {{ administrasi }}</td>
+        </tr>
+        <tr>
+            <td>Biaya Pemasaran</td>
+            <td>Rp. {{ pemasaran }}</td>
+        </tr>
+        <tr>
+            <th>Total Biaya</th>
+            <td>Rp. {{ totalbebanusaha }}</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table>
+        <tr>
+            <th>Laba Sebelum Pajak</th>
+            <td>Rp. {{ labasebelumpajak }}</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table>
+        <tr>
+            <th>Pajak Penghasilan</th>
+            <td>Rp. {{ pajak }}</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table>
+        <tr>
+            <th>Laba Bersih</th>
+            <td>Rp. {{ lababersih }}</td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

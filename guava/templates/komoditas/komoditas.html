@@ -403,17 +403,17 @@
                                     </thead>
                                     <tbody>
                                         <tr></tr>
-                                        {% for item in stok_per_komoditas %}
+                                        {% for item in allkomoditasobj %}
                                         <tr>
-                                            <td>{{ item.komoditas.id_komoditas  }}</td>
-                                            <td>{{ item.komoditas.nama_komoditas  }}</td>
-                                            <td>{{ item.komoditas.id_grade  }}</td>
-                                            <td>{{ item.komoditas.harga_beli  }}</td>
-                                            <td>{{ item.komoditas.harga_jual  }}</td>
+                                            <td>{{ item.id_komoditas  }}</td>
+                                            <td>{{ item.nama_komoditas  }}</td>
+                                            <td>{{ item.id_grade  }}</td>
+                                            <td>{{ item.harga_beli  }}</td>
+                                            <td>{{ item.harga_jual  }}</td>
                                             <td>{{item.stok}}</td>
                                             <td>
-                                                <a href="{% url 'updatekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'deletekomoditas' item.komoditas.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>
+                                                <a href="{% url 'updatekomoditas' item.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'deletekomoditas' item.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
                                         </tr>
                                         {% endfor %}
