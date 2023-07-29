@@ -248,12 +248,8 @@ def home(request):
 def mitra(request):
     mitraobj = models.mitra.objects.all()
     
-    is_admin = request.user.groups.filter(name='Admin').exists()
-    is_pegawai = request.user.groups.filter(name='karyawan').exists()
-
     return render(request, 'mitra/mitra.html', {
         'mitraobj' : mitraobj,
-        'is_pegawai' : is_pegawai
     })
 
 def create_mitra(request):
@@ -990,7 +986,7 @@ def stok_keseluruhan():
 
 def laporan_laba_rugi(request):
     if request.method == "GET":
-        return render(request,'laporan.html')
+        return render(request,'laporanlabarugi/laporan.html')
     elif request.method == "POST":
         mulai = request.POST['mulai']
         akhir = request.POST['akhir']
@@ -1056,7 +1052,7 @@ def laporan_laba_rugi(request):
         # LABA BERSIH
         lababersih = labasebelumpajak - biayapajak
 
-        return render(request, 'laporanlabarugi.html', {
+        return render(request, 'laporanlabarugi/laporanlabarugi.html', {
             "penjualan" : totalpenjualan,
             "hpp" : totalhpp,
             "labarugi" : labarugi,
@@ -1136,7 +1132,7 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
     response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
     response['Content-Transfer-Encoding'] = 'binary'
     html_string = render_to_string(
-        'laporanlabarugipdf.html',{
+        'laporanlabarugi/laporanlabarugipdf.html',{
             "penjualan" : totalpenjualan,
             "hpp" : totalhpp,
             "labarugi" : labarugi,
@@ -1159,6 +1155,176 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
         output.seek(0)
         response.write(output.read())
     
-    render(request, 'laporanlabarugipdf.html')
+    render(request, 'laporanlabarugi/laporanlabarugipdf.html')
+    
+    return response
+
+def laporanpenjualan(request):
+    if request.method == "GET":
+        return render(request, 'laporanpenjualan/laporanjual.html')
+    elif request.method == "POST":
+        detailobj = []
+
+        mulai = request.POST['mulai']
+        akhir = request.POST['akhir']
+
+        getlaporanpenjualan = models.penjualan.objects.filter(tanggal_penjualan__range=(mulai, akhir))
+        listtotalbanget = []
+        for item in getlaporanpenjualan:
+            datadetailobj = []
+            getdetailobject = models.detail_penjualan.objects.filter(id_penjualan_id = item.id_penjualan)
+            datadetailobj.append(item)
+            datadetailobj.append(getdetailobject)
+            listtotal = []
+            for i in getdetailobject:
+                if i.id_komoditas is not None:
+                    totalpenjualankom = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                    listtotal.append(totalpenjualankom)
+                if i.id_produk is not None:
+                    totalpenjualanprod = i.id_produk.hargaproduk*i.kuantitas_produk
+                    listtotal.append(totalpenjualanprod)
+            datadetailobj.append(listtotal)
+            totalbanget = sum(listtotal)
+            listtotalbanget.append(totalbanget)
+            datadetailobj.append(totalbanget)
+            detailobj.append(datadetailobj)
+        totalkeseluruhan = sum(listtotalbanget)
+
+        print(detailobj)
+
+        return render(request, 'laporanpenjualan/laporanpenjualan.html', {
+            'detailobjek' : detailobj,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
+            'pemasukan': totalkeseluruhan
+        })
+    
+def laporanpenjualanpdf (request, mulai, akhir):
+    detailobj = []
+
+    getlaporanpenjualan = models.penjualan.objects.filter(tanggal_penjualan__range=(mulai, akhir))
+    listtotalbanget = []
+    for item in getlaporanpenjualan:
+        datadetailobj = []
+        getdetailobject = models.detail_penjualan.objects.filter(id_penjualan_id = item.id_penjualan)
+        datadetailobj.append(item)
+        datadetailobj.append(getdetailobject)
+        listtotal = []
+        for i in getdetailobject:
+            if i.id_komoditas is not None:
+                totalpenjualankom = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                listtotal.append(totalpenjualankom)
+            if i.id_produk is not None:
+                totalpenjualanprod = i.id_produk.hargaproduk*i.kuantitas_produk
+                listtotal.append(totalpenjualanprod)
+        datadetailobj.append(listtotal)
+        totalbanget = sum(listtotal)
+        listtotalbanget.append(totalbanget)
+        datadetailobj.append(totalbanget)
+        detailobj.append(datadetailobj)
+    totalkeseluruhan = sum(listtotalbanget)
+
+    response = HttpResponse(content_type='application/pdf;')
+    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Transfer-Encoding'] = 'binary'
+    html_string = render_to_string(
+        'laporanpenjualan/laporanpenjualanpdf.html',{
+            'detailobj' : detailobj,
+            'pemasukan' : totalkeseluruhan,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
+            # 'totaltransaksi' : totaltransaksi,
+            })
+    html = HTML(string=html_string)
+    result = html.write_pdf()
+
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(result)
+        output.flush()
+        output.seek(0)
+        response.write(output.read())
+    
+    render(request, 'laporanpenjualan/laporanpenjualanpdf.html')
+    
+    return response
+
+def laporanpanen(request):
+    if request.method == "GET":
+        return render(request, 'laporanpanen/laporan.html')
+    elif request.method == "POST":
+        detailobj = []
+
+        mulai = request.POST['mulai']
+        akhir = request.POST['akhir']
+
+        getlaporanpanen = models.panen.objects.filter(tanggal_panen__range=(mulai, akhir))
+        listtotalbanget = []
+        for item in getlaporanpanen:
+            datadetailobj = []
+            getdetailobject = models.detail_panen.objects.filter(id_panen_id = item.id_panen)
+            datadetailobj.append(item)
+            datadetailobj.append(getdetailobject)
+            listtotal = []
+            for i in getdetailobject:
+                totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+                listtotal.append(totalpembelian)
+            datadetailobj.append(listtotal)
+            totalbanget = sum(listtotal)
+            listtotalbanget.append(totalbanget)
+            datadetailobj.append(totalbanget)
+            detailobj.append(datadetailobj)
+        totalkeseluruhan = sum(listtotalbanget)
+
+        print(detailobj)
+
+        return render(request, 'laporanpanen/laporanpanen.html', {
+            'detailobjek' : detailobj,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
+            'pengeluaran': totalkeseluruhan
+        })
+    
+def laporanpanenpdf (request, mulai, akhir):
+    detailobj = []
+
+    getlaporanpanen = models.panen.objects.filter(tanggal_panen__range=(mulai, akhir))
+    listtotalbanget = []
+    for item in getlaporanpanen:
+        datadetailobj = []
+        getdetailobject = models.detail_panen.objects.filter(id_panen_id = item.id_panen)
+        datadetailobj.append(item)
+        datadetailobj.append(getdetailobject)
+        listtotal = []
+        for i in getdetailobject:
+            totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+            listtotal.append(totalpembelian)
+        datadetailobj.append(listtotal)
+        totalbanget = sum(listtotal)
+        listtotalbanget.append(totalbanget)
+        datadetailobj.append(totalbanget)
+        detailobj.append(datadetailobj)
+    totalkeseluruhan = sum(listtotalbanget)
+
+    response = HttpResponse(content_type='application/pdf;')
+    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Transfer-Encoding'] = 'binary'
+    html_string = render_to_string(
+        'laporanpanen/laporanpanenpdf.html',{
+            'detailobj' : detailobj,
+            'pemasukan' : totalkeseluruhan,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
+            # 'totaltransaksi' : totaltransaksi,
+            })
+    html = HTML(string=html_string)
+    result = html.write_pdf()
+
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(result)
+        output.flush()
+        output.seek(0)
+        response.write(output.read())
+    
+    render(request, 'laporanpanen/laporanpanenpdf.html')
     
     return response

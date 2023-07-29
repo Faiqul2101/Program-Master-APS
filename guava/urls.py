@@ -77,7 +77,11 @@ urlpatterns = [
     # LAPORAN
     path('laporan', views.laporan_laba_rugi, name='laporan'),
     path('laporanpdf/<str:mulai>/<str:akhir>',views.laporan_laba_rugi_pdf,name='laporanpdf'),
-    
+    path('laporanjual', views.laporanpenjualan, name='laporanjual'),
+    path('laporanpenjualanpdf/<str:mulai>/<str:akhir>',views.laporanpenjualanpdf,name='laporanpenjualanpdf'),
+    path('laporanpanen', views.laporanpanen,name='laporanpanen'),
+    path('laporanpanenpdf/<str:mulai>/<str:akhir>',views.laporanpanenpdf,name='laporanpanenpdf'),
+
 
 
     ]   

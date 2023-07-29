@@ -49,20 +49,6 @@ class komoditas(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.nama_komoditas, self.id_grade)
-    
-    def get_stok_tersedia(self):
-        global stok_tersedia
-        total_stok = sum(detail_panen_obj.jumlah for detail_panen_obj in self.detail_panen_set.all())
-        total_terjual = sum(detail_penjualan_obj.kuantitas_komoditas for detail_penjualan_obj in self.detail_penjualan_set.all())
-        stok_tersedia = total_stok - total_terjual if total_stok >= total_terjual else 0
-        
-        return stok_tersedia
-    
-    def kurangi_stok(self, jumlah_dikurangi):
-        a = stok_tersedia
-        stok_tersediaa = self.get_stok_tersedia()
-        if stok_tersediaa >= jumlah_dikurangi:
-            self.total_stok -= jumlah_dikurangi
             
 
 class detail_panen(models.Model):
@@ -74,11 +60,6 @@ class detail_panen(models.Model):
 
     def __str__(self):
         return str(self.id_panen)
-    
-    def get_total_stok(self):
-        return self.jumlah
-    
-
 
 class pasar(models.Model):
     id_pasar = models.AutoField(primary_key=True)
@@ -106,9 +87,6 @@ class detail_penjualan(models.Model):
 
     def __str__(self):
         return str(self.id_penjualan)
-    
-    def get_total_terjual(self):
-        return self.kuantitas_komoditas
     
 class transaksi_lain(models.Model):
     id_transaksi = models.AutoField(primary_key=True)
