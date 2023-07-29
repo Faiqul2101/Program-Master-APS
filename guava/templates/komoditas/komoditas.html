@@ -403,14 +403,14 @@
                                     </thead>
                                     <tbody>
                                         <tr></tr>
-                                        {% for item in allkomoditasobj %}
+                                        {% for item, stok in tuple %}
                                         <tr>
                                             <td>{{ item.id_komoditas  }}</td>
                                             <td>{{ item.nama_komoditas  }}</td>
                                             <td>{{ item.id_grade  }}</td>
                                             <td>{{ item.harga_beli  }}</td>
                                             <td>{{ item.harga_jual  }}</td>
-                                            <td>{{item.stok}}</td>
+                                            <td>{{stok}}</td>
                                             <td>
                                                 <a href="{% url 'updatekomoditas' item.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
                                                 <a href="{% url 'deletekomoditas' item.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>

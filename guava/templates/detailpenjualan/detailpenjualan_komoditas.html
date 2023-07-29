@@ -395,7 +395,6 @@
                                             <th>ID Pasar</th>
                                             <th>Nama Komoditas</th>
                                             <th>Jumlah Komoditas</th>
-                                            <th>Action</th>        
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -405,10 +404,6 @@
                                             <td>{{ item.id_penjualan }}</td>
                                             <td>{{ item.id_komoditas}}</td>
                                             <td>{{ item.kuantitas_komoditas}}</td>
-                                            <td>
-                                                <a href="{% url 'mitra'  %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'mitra'  %}"><button class="btn btn-danger">Delete</button></a>
-                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

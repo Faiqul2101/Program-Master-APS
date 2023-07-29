@@ -8,18 +8,14 @@ def role_required(allowed_roles=[]):
             if request.user.groups.exists():
                 group = request.user.groups.all()[0].name
 
-            request.is_admin = group == 'Admin'
-            request.is_pegawai = group == 'Pegawai'
-            
+            request.is_admin = group == 'admin'
+            request.is_karyawan = group == 'karyawan'
+            request.is_owner = group == 'owner'
 
             if group in allowed_roles:
                 return func(request, *args, **kwargs)
             else: 
                 return HttpResponse('nda boleh kesini')
-            # group_name = request.user.groups.values_list('name',flat = True)[0]
-            # if group_name in allowed_roles:
-            #     return func(request,*args, **kwargs)
-            # else :
-            #     raise PermissionDenied
+
         return wrap
     return decorator

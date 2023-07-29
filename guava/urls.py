@@ -20,13 +20,15 @@ urlpatterns = [
 
     # GRADE
     path('grade/', views.grade,name='grade'),
+    path('grade/creategrade', views.create_grade,name='creategrade'),
+    path('grade/updategrade/<int:id>', views.update_grade,name='updategrade'),
+    path('grade/deletegrade/<int:id>', views.delete_grade,name='deletegrade'),
 
     # PRODUK
     path('produk/', views.produk,name='produk'),
     path('produk/createproduk', views.create_produk,name='createproduk'),
     path('produk/updateproduk/<str:id>', views.update_produk,name='updateproduk'),
     path('deleteproduk/<str:id>', views.delete_produk,name='deleteproduk'),
-    path('olahproduk', views.olah_produk,name='olahproduk'),
 
     # PASAR
     path('pasar/', views.pasar,name='pasar'),
@@ -48,37 +50,34 @@ urlpatterns = [
 
     # PANEN
     path('panen/', views.panen,name='panen'),
-    
     path('panen/updatepanen/<str:id>', views.update_panen,name='updatepanen'),
     path('deletepanen/<str:id>', views.delete_panen,name='deletepanen'),
 
     # DETAIL PANEN
-    path('panen/createpanen/<str:id>/', views.create_panen,name='createpanen'),
     path('detailpanen/', views.detailpanen,name='detailpanen'),
+    path('panen/createpanen/<str:id>/', views.create_panen,name='createpanen'),
     path('detailpanen/ubahdetailpanen/<str:id>/', views.ubah_panen,name='ubahdetailpanen'),
-    # path('detailpanen/createdetailpanen/<int:id>/', views.create_detailpanen,name='createdetailpanen'),
-    
+    path('detailpanen/updatedetailpanen/<str:id>', views.update_detailpanen,name='updatedetailpanen'),
+    path('deletedetailpanen/<str:id>', views.delete_detailpanen,name='deletedetailpanen'),
+
     # PENJUALAN
     path('penjualan/', views.penjualan,name='penjualan'),
-    path('penjualan/createpenjualan', views.jual,name='createpenjualan'),
-    
+    path('penjualan/createpenjualan', views.cerate_penjualan,name='createpenjualan'),
+    path('penjualan/updatepenjualan/<str:id>', views.updatepenjualan,name='updatepenjualan'),
+    path('deletepenjualan/<str:id>', views.deletepenjualan,name='deletepenjualan'),
+
     # DETAIL PENJUALAN
+    path('detailpenjualan', views.detail_penjualan,name='detailpenjualan'),
     path('detailpenjualan1', views.detail_penjualan_komoditas,name='detailpenjualan_komoditas'),
     path('detailpenjualan2', views.detail_penjualan_produk,name='detailpenjualan_produk'),
-    # path('createdetailpenjualan/<int:id>/', views.create_detailpenjualan, name='createdetailpenjualan'),
     path('detailpenjualan/createdetailpenjualan_produk/<int:id>/', views.create_detailpenjualan_produk, name='createdetailpenjualan_produk'),
     path('detailpenjualan/createdetailpenjualan_komoditas/<int:id>/', views.create_detailpenjualan_komoditas, name='createdetailpenjualan_komoditas'),
-    
+    path('detailpenjualan/updatedetailpenjualan/<str:id>', views.update_detailpenjualan,name='updatedetailpenjualan'),
+    path('deletedetailpenjualan/<str:id>', views.delete_detailpenjualan,name='deletedetailpenjualan'),
     # LAPORAN
-    path('laporan', views.laporan_laba_rugi),
+    path('laporan', views.laporan_laba_rugi, name='laporan'),
+    path('laporanpdf/<str:mulai>/<str:akhir>',views.laporan_laba_rugi_pdf,name='laporanpdf'),
     
-    
-    
-    
-    
-    path('coba',views.coba),
-    # path('cobaa',views.cobaa),
-    path('q',views.cobaproduk),
 
 
     ]   

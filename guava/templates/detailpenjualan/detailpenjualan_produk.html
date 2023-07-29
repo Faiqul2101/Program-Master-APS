@@ -394,9 +394,7 @@
                                             <th>ID Detail Jual</th>
                                             <th>ID Pasar</th>
                                             <th>Nama Produk</th>
-                                            <th>Jumlah Produk</th>
-
-                                            <th>Action</th>        
+                                            <th>Jumlah Produk</th>  
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -406,11 +404,6 @@
                                             <td>{{ item.id_penjualan }}</td>
                                             <td>{{ item.id_produk}}</td>
                                             <td>{{ item.kuantitas_produk}}</td>
-
-                                            <td>
-                                                <a href="{% url 'mitra'  %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'mitra'  %}"><button class="btn btn-danger">Delete</button></a>
-                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

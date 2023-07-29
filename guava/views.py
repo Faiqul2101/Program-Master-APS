@@ -2,16 +2,19 @@ from django.shortcuts import render, redirect
 from . import models
 from datetime import datetime
 import calendar
-from django.contrib import messages
+from .decorators import role_required
 from django.http import HttpResponse
+from django.contrib import messages
 from django.contrib.auth import login , logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.forms import DateInput
 from django.db import transaction
-import matplotlib.pyplot as plt
-import json
 from django.core.exceptions import ValidationError
+import json
+from weasyprint import HTML
+from django.template.loader import render_to_string
+import tempfile
 
 # Create your views here.
 
@@ -25,6 +28,45 @@ komoditas_to_produk_mapping = {
 
 #  LOGIN
 @login_required
+def logoutview(request):
+    logout(request)
+    messages.info(request,"Berhasil Logout")
+    return redirect('login')
+
+def loginview(request):
+    if request.user.is_authenticated:
+        return redirect("mitra")
+    else:
+        return render(request,"login.html")
+    
+def performlogin(request):
+    if request.method != "POST":
+        return HttpResponse("Method not Allowed")
+    else:
+        print(request)
+        username_login = request.POST['username']
+        # print(username)
+        password_login = request.POST['password']
+        # print(username)
+        userobj = authenticate(request, username=username_login,password=password_login)
+        print(userobj)
+        if userobj is not None:
+            login(request, userobj)
+            messages.success(request,"Login success")
+            return redirect("mitra")
+        else:
+            messages.error(request,"Username atau Password salah !!!")
+            return redirect("login")
+        
+@login_required
+def performlogout(request):
+    logout(request)
+    print("Anda keluar")
+    return redirect("login")
+
+# DASHBOARD 
+@login_required
+@role_required(["admin"])
 def home(request):
     if not request.user.is_authenticated:
         return render(request, 'loginsiam.html')
@@ -201,54 +243,17 @@ def home(request):
         return render(request, 'index.html', context)
 
 
-@login_required
-def logoutview(request):
-    logout(request)
-    messages.info(request,"Berhasil Logout")
-    return redirect('login')
-
-def loginview(request):
-    if request.user.is_authenticated:
-        return redirect("mitra")
-    else:
-        return render(request,"loginsiam.html")
-    
-def performlogin(request):
-    if request.method != "POST":
-        return HttpResponse("Method not Allowed")
-    else:
-        print(request)
-        username_login = request.POST['username']
-        # print(username)
-        password_login = request.POST['password']
-        # print(username)
-        userobj = authenticate(request, username=username_login,password=password_login)
-        print(userobj)
-        if userobj is not None:
-            login(request, userobj)
-            messages.success(request,"Login success")
-            return redirect("mitra")
-        else:
-            messages.error(request,"Username atau Password salah !!!")
-            return redirect("login")
-        
-@login_required
-def performlogout(request):
-    logout(request)
-    print("Anda keluar")
-    return redirect("login")
-
-
 # MITRA
 
 def mitra(request):
     mitraobj = models.mitra.objects.all()
     
-    # is_admin = request.user.groups.filter(name='Admin').exists()
-    # is_pegawai = request.user.groups.filter(name='Pegawai').exists()
+    is_admin = request.user.groups.filter(name='Admin').exists()
+    is_pegawai = request.user.groups.filter(name='karyawan').exists()
 
     return render(request, 'mitra/mitra.html', {
         'mitraobj' : mitraobj,
+        'is_pegawai' : is_pegawai
     })
 
 def create_mitra(request):
@@ -320,6 +325,36 @@ def grade(request):
         'gradeobj' : gradeobj
     })
 
+def create_grade(request):
+    if request.method == "GET":
+        return render(request, "grade/creategrade.html")
+    else:
+        nama_grade = request.POST["nama_grade"]
+        deskripsi = request.POST["deskripsi"]
+
+        models.grade(
+            nama_grade = nama_grade,
+            deskripsi = deskripsi
+        ).save()
+        return redirect('grade')
+
+def update_grade(request, id):
+    gradeobj = models.grade.objects.get(id_grade = id)
+    if request.method == "GET":
+        return render(request, "grade/updategrade.html", {
+            "gradeobj" : gradeobj
+        })
+    else:
+        gradeobj.nama_grade = request.POST["nama_grade"]
+        gradeobj.deskripsi = request.POST["deskripsi"]
+        gradeobj.save()
+        return redirect('grade')
+
+def delete_grade(request, id):
+    gradeobj = models.grade.objects.get(id_grade = id)
+    gradeobj.delete()
+    return redirect('grade')
+
 # PRODUK
 
 @login_required
@@ -333,7 +368,7 @@ def produk(request):
 @login_required
 def create_produk(request):
     if request.method == "GET" :
-        return render(request, 'produk/createproduk.html')
+        return render(request, 'produk/createproduk.html', )
     else:
         nama_produk = request.POST['namaproduk']
         satuan_produk = request.POST['satuanproduk']
@@ -345,41 +380,6 @@ def create_produk(request):
             hargaproduk = harga_produk,
         ).save()
         return redirect('produk')
-
-def olah_produk(request):
-    # Dictionary to map komoditas names to corresponding produk names and multipliers
-    komoditas_to_produk_mapping = {
-        'Jambu Kristal': ('Pastry', 3),
-        'Cale': ('Keripik Cale', 4),
-    }
-    # detailpanenobj = models.detail_panen.objects.get(id_detailpanen = id)
-    komoditas_olah = models.komoditas.objects.filter(id_grade__nama_grade='Olah')
-    detail_panen_olah = models.detail_panen.objects.filter(id_komoditas__id_grade__nama_grade = "Olah")
-    
-    panenolah = []
-
-    for item in detail_panen_olah:
-        getkomoditas = models.komoditas.objects.get(id_komoditas = item.id_komoditas)
-        panenolah.append(item.jumlah)
-
-    totalpanenolah = sum(panenolah)
-    print(panenolah)
-    print(totalpanenolah)
-    return HttpResponse()
-    # if request.method == "GET":
-    #     context = { 
-    #         "detail_panen_olah" : detail_panen_olah
-    #     }
-    #     print(detail_panen_olah)
-    #     return render(request, "olahproduk.html", context)
-    # else:
-    #     jumlah_olah = request.POST["jumlah"]
-    #     if jumlah_olah > detailpanenobj.jumlah:
-    #         raise ValidationError('Jumlah Yang Diinputkan melebihi stok yang tersedia.')
-    #     else: 
-    #         detailpanenobj.jumlah = detailpanenobj.jumlah - jumlah_olah
-    #         detailpanenobj.save()
-
 
 
 @login_required
@@ -451,19 +451,17 @@ def delete_pasar(request,id):
 
 def komoditas(request):
     allkomoditasobj = models.komoditas.objects.all()
-    komoditasnon = models.komoditas.objects.exclude(id_grade__nama_grade="Olah")
-    komoditasolah = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
-    stok_nonolah = coba(komoditasnon)
-    # stok_olah = cobaproduk(komoditasolah)
-    stok_list = []
-
- 
+    stok = stok_keseluruhan()
+    keseluruhan = []
+    for item in allkomoditasobj:
+        for x in stok:
+            if item.nama_komoditas + ' ' + item.id_grade.nama_grade == x['komoditas']:
+                keseluruhan.append((item , x['stok']))
+    print(keseluruhan)
+    
     return render(request, 'komoditas/komoditas.html', {
-        'stok_per_komoditas': stok_list,
-        'allkomoditasobj' : allkomoditasobj
+        'tuple': keseluruhan,
     })
-
-    # return HttpResponse(f'stok olah : {stok_olah} \n Stok non : {stok_nonolah}')
 
 def create_komoditas(request):
     if request.method == 'GET':
@@ -479,7 +477,6 @@ def create_komoditas(request):
         harga_beli = request.POST['harga_beli']
         harga_jual = request.POST['harga_jual']
 
-        # Simpan detail komoditas
         new_komoditas = models.komoditas.objects.create(
             id_grade_id = id_grade,
             nama_komoditas = nama_komoditas,
@@ -678,6 +675,7 @@ def delete_panen(request,id):
     panen_obj.delete()
     return redirect('panen')
 
+# DETAIL PANEN
 
 @login_required
 def detailpanen(request):
@@ -689,6 +687,37 @@ def detailpanen(request):
         'detailpanen_olah' : detailpanen_olah
         })
 
+@login_required
+def update_detailpanen(request, id):
+    detailpanenobj = models.detail_panen.objects.get(id_detailpanen=id)
+    allkomoditasobj = models.komoditas.objects.all()
+
+    if request.method == "GET":
+        tanggal = detailpanenobj.tanggalkadaluwarsa.strftime('%Y-%m-%d')
+        return render(request, 'detailpanen/updatedetailpanen.html', {
+            'alldetailpanen': detailpanenobj,
+            'datakomoditas': allkomoditasobj,
+            'tanggal': tanggal
+        })
+    elif request.method == "POST":
+        id_komoditas = request.POST["id_komoditas"]
+        getidkomoditas = models.komoditas.objects.get(id_komoditas=id_komoditas)
+        jumlah = request.POST["jumlah"]
+        tanggal_kadaluwarsa = request.POST["tanggalkadaluwarsa"]
+
+        detailpanenobj.id_komoditas = getidkomoditas
+        detailpanenobj.jumlah = jumlah
+        detailpanenobj.tanggalkadaluwarsa = tanggal_kadaluwarsa
+        detailpanenobj.save()
+
+        return redirect('detailpanen')
+    
+@login_required
+def delete_detailpanen(request,id):
+    detailpanenobj = models.detail_panen.objects.get(id_detailpanen=id)
+    detailpanenobj.delete()
+    return redirect('detailpanen')
+
 # PENJUALAN 
 
 @login_required
@@ -696,6 +725,40 @@ def penjualan(request):
     penjualanobj = models.penjualan.objects.all()
     return render (request, 'penjualan/penjualan.html',{
         'penjualanobj' : penjualanobj
+    })
+
+@login_required
+def updatepenjualan(request,id):
+    penjualanobj = models.penjualan.objects.get(id_penjualan=id)
+    datapasar = models.pasar.objects.all()
+    if request.method == "GET":
+        tanggal = datetime.strftime(penjualanobj.tanggal_penjualan, '%Y-%m-%d')
+        return render(request, 'penjualan/updatepenjualan.html', {
+            'penjualanobj' : penjualanobj,
+            'tanggal' : tanggal,
+            "datapasar" : datapasar
+        })
+    else:
+        penjualanobj.tanggal_penjualan = request.POST['tanggalpenjualan']
+        id_pasar = request.POST['id_pasar']
+        getidpasar = models.pasar.objects.get(id_pasar=id_pasar)
+        penjualanobj.id_pasar = getidpasar
+        penjualanobj.save()
+        return redirect('penjualan')
+
+@login_required
+def deletepenjualan(request, id):
+    penjualanobj = models.penjualan.objects.get(id_penjualan = id)
+    penjualanobj.delete()
+    return redirect ('penjualan')
+
+
+# DETAIL PENJUALAN
+
+def detail_penjualan(request):
+    detailpenjualanobj = models.detail_penjualan.objects.all()
+    return render(request, 'detailpenjualan/detailpenjualan.html', {
+        'detailpenjualanobj': detailpenjualanobj
     })
 
 def detail_penjualan_komoditas(request):
@@ -709,7 +772,8 @@ def detail_penjualan_produk(request):
     return render(request, 'detailpenjualan/detailpenjualan_produk.html', {
         'detailpenjualanobj': detailpenjualanobj
     })
-def jual(request):
+
+def cerate_penjualan(request):
     if request.method == 'GET':
         pasarobj = models.pasar.objects.all()
         return render(request, 'penjualan/createpenjualan.html', {
@@ -724,7 +788,7 @@ def jual(request):
             tanggal_penjualan = tanggal_penjualan
         )
         newid = newpenjualan.id_penjualan
-        # return redirect('penjualan')
+
         return redirect('penjualan')
 
 def create_detailpenjualan_produk(request, id):
@@ -755,9 +819,9 @@ def create_detailpenjualan_produk(request, id):
                                 produced_commodity_quantity = kuantitas_komoditas * factor
 
                                 # Check if the stock of the related processed commodity is sufficient
-                                stok_tersedia = cobaproduk()
+                                stok_tersedia = stok_olah()
                                 for stok_item in stok_tersedia:
-                                    if stok_item['komoditas'] == komoditas_grade_olah:
+                                    if stok_item['komoditas'] == komoditas_grade_olah + ' Olah':
                                         if stok_item['stok'] >= produced_commodity_quantity:
                                             detail_penjualan_obj = form.save(commit=False)
                                             detail_penjualan_obj.id_penjualan = penjualan_obj
@@ -807,7 +871,7 @@ def create_detailpenjualan_komoditas(request, id):
                         kuantitas_komoditas = form.cleaned_data.get('kuantitas_komoditas')
                         if id_komoditas and kuantitas_komoditas:
                             komoditas_obj = models.komoditas.objects.get(id_komoditas=id_komoditas.id_komoditas)
-                            stok_tersedia = coba([komoditas_obj])
+                            stok_tersedia = stok_awal([komoditas_obj])
                             stok_tersedia_komoditas = stok_tersedia[0]['stok']
                             if kuantitas_komoditas > stok_tersedia_komoditas:
                                 form.add_error('kuantitas_komoditas', 'Jumlah komoditas melebihi stok yang tersedia.')
@@ -828,23 +892,47 @@ def create_detailpenjualan_komoditas(request, id):
     
     return render(request, 'detailpenjualan/createdetailpenjualan_komoditas.html', {'formset': formset, 'penjualan': penjualan_obj})
 
-def create_transaksi_lain(request):
+
+def update_detailpenjualan(request, id):
+    getdetailpenjualan = models.detail_penjualan.objects.get(id_detailpenjualan = id)
     if request.method == "GET":
-        return render (request, "transaksilain/createtransaksilain.html")
+        komoditasobj = models.komoditas.objects.all()
+        produkobj = models.produk.objects.all()
+        return render (request, 'detailpenjualan/updatedetailpenjualan.html', {
+            'detailjualobj' : getdetailpenjualan,
+            'datakomoditas' : komoditasobj,
+            'dataproduk' : produkobj
+        })
     else:
-        jenis_transaksi = request.POST["jenis_transaksi"]
-        tanggal_transaksi = request.POST["tanggal_transaksi"]
-        biaya = request.POST["biaya"]
+        id_komoditas = request.POST['id_komoditas']
+        getidkomoditas = models.komoditas.objects.get(id_komoditas = id_komoditas)
+        kuantitas_komoditas = request.POST['kuantitas_komoditas']
+        id_produk = request.POST['id_produk']
+        getidproduk = models.produk.objects.get(id_produk = id_produk)
+        kuantitas_produk = request.POST['kuantitas_produk']
 
-        new_transaksi_lain = models.transaksi_lain(
-            jenis_transaksi = jenis_transaksi,
-            tanggal_transaksi = tanggal_transaksi,
-            biaya = biaya
-        )
-        new_transaksi_lain.save()
-        return redirect("transaksilain")
+        getdetailpenjualan.id_komoditas = getidkomoditas
+        getdetailpenjualan.id_produk = getidproduk
 
-def coba(obj):
+        if kuantitas_komoditas == "":
+            getdetailpenjualan.id_komoditas = None
+            kuantitas_komoditas = None
+        elif kuantitas_produk == "":
+            getdetailpenjualan.id_produk = None
+            kuantitas_produk = None
+
+        getdetailpenjualan.kuantitas_produk = kuantitas_produk
+        getdetailpenjualan.kuantitas_komoditas = kuantitas_komoditas
+        getdetailpenjualan.save()
+        return redirect("detailpenjualan")
+
+def delete_detailpenjualan(request,id):
+    getdetailpenjualan = models.detail_penjualan.objects.get(id_detailpenjualan = id)
+    getdetailpenjualan.delete()
+    return redirect('detailpenjualan')
+
+
+def stok_awal(obj):
     stok_per_komoditas =[]
     for i in obj:
         dummy = {}
@@ -858,18 +946,19 @@ def coba(obj):
         for x in b:
             totalpanen += x.jumlah
         totalstok = totalpanen - totalpenjualan
-        dummy['komoditas'] = i.nama_komoditas
+        dummy['komoditas'] = i.nama_komoditas + ' ' + i.id_grade.nama_grade
         dummy['stok'] = totalstok
         stok_per_komoditas.append(dummy)
-    
-        print(totalstok)
+
+        
+
     return stok_per_komoditas
         
 
-def cobaproduk():
+def stok_olah():
     produkobj = models.produk.objects.all()
     obj = models.komoditas.objects.filter(id_grade__nama_grade="Olah")
-    stok_olah = coba(obj)
+    stok_olah = stok_awal(obj)
 
     for i in produkobj:
         getdetailjual = models.detail_penjualan.objects.filter(id_produk=i.id_produk)
@@ -883,10 +972,21 @@ def cobaproduk():
             komoditas_grade_olah, factor = komoditas_to_produk_mapping[i.namaproduk]
             komoditas_dibutuhkan = kuantitasproduk * factor
             for z in stok_olah:
-                if z['komoditas'] == komoditas_grade_olah:
+                if z['komoditas'] == komoditas_grade_olah + ' Olah':
                     z['stok'] -= komoditas_dibutuhkan
 
     return stok_olah
+
+def stok_keseluruhan():
+    obj1 = models.komoditas.objects.exclude(id_grade__nama_grade = "Olah")
+    
+    list1 = stok_awal(obj1)
+    list2 = stok_olah()
+
+    gabungan = list1 + list2
+
+    return gabungan
+
 
 def laporan_laba_rugi(request):
     if request.method == "GET":
@@ -905,7 +1005,7 @@ def laporan_laba_rugi(request):
 
         for item in penjualanrange:
             getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
-            print('get', getdetailjual)
+            
             for i in getdetailjual:
                 if i.id_komoditas is not None:
                     totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
@@ -966,4 +1066,99 @@ def laporan_laba_rugi(request):
             "labasebelumpajak" : labasebelumpajak,
             "pajak" : biayapajak,
             "lababersih" : lababersih,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
         })
+    
+def laporan_laba_rugi_pdf(request,mulai,akhir):
+    # PENJUALAN
+    penjualanrange = models.penjualan.objects.filter(tanggal_penjualan__range = (mulai, akhir))
+
+    penjualansebulan_produk = []
+    penjualansebulan_komoditas = []
+    pembeliansebulan = []
+    transaksisebulan = []
+
+    for item in penjualanrange:
+        getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
+        
+        for i in getdetailjual:
+            if i.id_komoditas is not None:
+                totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
+                penjualansebulan_komoditas.append(totalpenjualan_komoditas)
+            if i.id_produk is not None:
+                totalpenjualan_produk = i.id_produk.hargaproduk*i.kuantitas_produk
+                penjualansebulan_produk.append(totalpenjualan_produk)
+
+    totalpenjualan = sum(penjualansebulan_komoditas) + sum(penjualansebulan_produk)
+
+    # HPP dan BIAYA LAIN
+    pembelianrange = models.panen.objects.filter(tanggal_panen__range=(mulai,akhir))
+
+    for item in pembelianrange:
+        getdetailbeli = models.detail_panen.objects.filter(id_panen=item.id_panen)
+        for i in getdetailbeli:
+            totalpembelian = i.id_komoditas.harga_beli*i.jumlah
+            pembeliansebulan.append(totalpembelian)
+
+    totalpanen = sum(pembeliansebulan)
+
+    transaksirange = models.transaksi_lain.objects.filter(tanggal_transaksi__range=(mulai,akhir))
+    biayahpp = ["Biaya Tenaga Kerja" , "Biaya Listrik" , "Biaya Air"]
+    biayapemasaran = 0
+    biayaadministrasi = 0
+    biayapajak = 0
+
+    for item in transaksirange:
+        if item.jenis_transaksi in biayahpp:
+            transaksisebulan.append(item.biaya)
+        elif item.jenis_transaksi == "Biaya Pemasaran":
+            biayapemasaran += item.biaya
+        elif item.jenis_transaksi == "Biaya Administrasi":
+            biayaadministrasi += item.biaya
+        elif item.jenis_transaksi == "Biaya Pajak":
+            biayapajak += item.biaya
+
+    totaltransaksi = sum(transaksisebulan)
+    totalbebanusaha = biayapemasaran + biayaadministrasi
+    totalhpp = totalpanen + totaltransaksi
+    
+    # LABA / RUGI
+    labarugi = totalpenjualan - totalhpp  
+
+    # LABA SEBELUM PAJAK
+    labasebelumpajak = labarugi -totalbebanusaha
+    
+    # LABA BERSIH
+    lababersih = labasebelumpajak - biayapajak
+
+    response = HttpResponse(content_type='application/pdf;')
+    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Transfer-Encoding'] = 'binary'
+    html_string = render_to_string(
+        'laporanlabarugipdf.html',{
+            "penjualan" : totalpenjualan,
+            "hpp" : totalhpp,
+            "labarugi" : labarugi,
+            "pemasaran" : biayapemasaran,
+            "administrasi" : biayaadministrasi,
+            "totalbebanusaha": totalbebanusaha,
+            "labasebelumpajak" : labasebelumpajak,
+            "pajak" : biayapajak,
+            "lababersih" : lababersih,
+            'tanggalmulai': mulai,
+            'tanggalakhir': akhir,
+            })
+    
+    html = HTML(string=html_string)
+    result = html.write_pdf()
+
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(result)
+        output.flush()
+        output.seek(0)
+        response.write(output.read())
+    
+    render(request, 'laporanlabarugipdf.html')
+    
+    return response

@@ -92,7 +92,7 @@
                     </div>
                 </div>
             </li>
-       
+
             <!-- Divider -->
             <hr class="sidebar-divider">
 
@@ -395,6 +395,7 @@
                                             <th>ID Grade</th>
                                             <th>Nama Grade</th>
                                             <th>Deskripsi</th>                                            <th>Action</th>        
+                                            <th>Action</th>                                            <th>Action</th>        
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -403,6 +404,10 @@
                                             <td>{{ item.id_grade  }}</td>
                                             <td>{{ item.nama_grade  }}</td>
                                             <td>{{ item.deskripsi  }}</td>
+                                            <td>
+                                                <a href="{% url 'updategrade' item.id_grade %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'deletegrade' item.id_grade  %}"><button class="btn btn-danger">Delete</button></a>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

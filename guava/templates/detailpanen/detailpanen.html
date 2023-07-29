@@ -398,7 +398,8 @@
                                             <th>Jumlah Panen</th>
                                             <th>Tanggal Panen</th>
                                             <th>Tanggal Kadaluwarsa</th>
-                                            <th>Action</th>        
+                                            <th>Action</th>
+     
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -411,11 +412,11 @@
                                             <td>{{ item.jumlah}}</td>
                                             <td>{{item.id_panen.tanggal_panen}}</td>
                                             <td>{{ item.tanggalkadaluwarsa}}</td>
-                                            {% if item in detailpanen_olah%}
                                             <td>
-                                                <a href="{% url 'olahproduk'  %}"><button class="btn btn-info">Olah</button></a>
+                                                <a href="{% url 'updatedetailpanen' item.id_detailpanen %}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'deletedetailpanen' item.id_detailpanen %}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
-                                            {% endif %}
+
                                             
                                         </tr>
                                         {% endfor %}

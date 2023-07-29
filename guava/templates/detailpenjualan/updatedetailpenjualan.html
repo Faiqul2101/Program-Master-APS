@@ -388,18 +388,7 @@
                             <form method="post" id="updatepembelian">
                             <!-- <form action="" method="post"> -->
                                 {% csrf_token %}
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Tanggal Pembelian</label>
-                                    <select class="form-control" id="exampleFormControlSelect1" name="id_penjualan">
-                                        {% for item in datapenjualan %}
-                                            {% if item.id_penjualan == detailjualobj.id_penjualan.id_penjualan %}
-                                                <option selected value="{{ item.id_penjualan }}">{{ item.tanggalpenjualan }}</option>
-                                            {% else %}
-                                                <option value="{{ item.id_penjualan }}">{{ item.tanggalpenjualan }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                                
                                 <div class="mb-3">
                                     <label for="exampleInputPassword1" class="form-label">Nama Produk</label>
                                     <select class="form-control" id="exampleFormControlSelect1" name="id_produk">
@@ -414,11 +403,30 @@
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Jumlah</label>
-                                    <input required type="number" class="form-control" id="exampleFormControlSelect1" name="jumlah"
-                                    value="{{ detailjualobj.jumlah }}">
-                                    </input>
-                                </div>
+                                    <label for="exampleInputEmail1" class="form-label">Kuantitas Produk</label>
+                                    <input  type="number" class="form-control" id="exampleFormControlSelect1" name="kuantitas_produk"
+                                    value="{{ detailjualobj.kuantitas_produk }}">
+                                </input>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Nama Produk</label>
+                                <select class="form-control" id="exampleFormControlSelect1" name="id_komoditas">
+                                    {% for item in datakomoditas %}
+                                        {% if item.id_komoditas == detailjualobj.id_komoditas.id_komoditas %}
+                                            <option selected value="{{ item.id_komoditas }}">{{ item.nama_komoditas }} - {{ item.id_grade }}</option>
+                                        {% else %}
+                                            <option value="{{ item.id_komoditas }}">{{ item.nama_komoditas }} - {{ item.id_grade }}</option>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Kuantitas Komoditas</label>
+                                <input  type="number" class="form-control" id="exampleFormControlSelect1" name="kuantitas_komoditas"
+                                value="{{ detailjualobj.kuantitas_komoditas }}">
+                            </input>
+                        </div>
+                            
                                 <button type="submit" class="btn btn-secondary">Update</button>
                             </form>
                         </div>

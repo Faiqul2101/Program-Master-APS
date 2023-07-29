@@ -404,8 +404,8 @@
                                             <td>{{ item.id_pasar  }}</td>
                                             <td>{{ item.tanggal_penjualan}}</td>
                                             <td>
-                                                <a href="{% url 'penjualan' %}"><button class="btn btn-warning">Update</button></a>
-                                                <a href="{% url 'mitra'%}"><button class="btn btn-danger">Delete</button></a>
+                                                <a href="{% url 'updatepenjualan' item.id_penjualan%}"><button class="btn btn-warning">Update</button></a>
+                                                <a href="{% url 'deletepenjualan' item.id_penjualan%}"><button class="btn btn-danger">Delete</button></a>
                                             </td>
                                             <td>
                                                 <a href="{% url 'createdetailpenjualan_produk' item.id_penjualan%}"><button class="btn btn-warning">Beli Produk</button></a>
