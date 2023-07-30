@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mitra</title>
+    <title>KOMODITAS</title>
 
     <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -46,11 +46,13 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
+            {% if is_admin or is_owner %}
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'home' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
+            {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -302,7 +304,7 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Data Mitra</h1>
+                    <h1 class="h3 mb-2 text-gray-800">Data Komoditas</h1>
                     <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                         For more information about DataTables, please visit the <a target="_blank"
                             href="https://datatables.net">official DataTables documentation</a>.</p> -->
@@ -310,7 +312,7 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Data Mitra</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Data Komoditas</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -338,7 +340,9 @@
                                             <td>{{stok}}</td>
                                             <td>
                                                 <a href="{% url 'updatekomoditas' item.id_komoditas %}"><button class="btn btn-warning">Update</button></a>
+                                                {% if is_owner %}
                                                 <a href="{% url 'deletekomoditas' item.id_komoditas %}"><button class="btn btn-danger">Delete</button></a>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -366,7 +370,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>LOSIK TI UB</span>
                     </div>
                 </div>
             </footer>

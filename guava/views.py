@@ -90,7 +90,6 @@ def home(request):
 
         for item in penjualanbulan:
             getdetailjual = models.detail_penjualan.objects.filter(id_penjualan=item.id_penjualan)
-            print('get', getdetailjual)
             for i in getdetailjual:
                 if i.id_komoditas is not None:
                     totalpenjualan_komoditas = i.id_komoditas.harga_jual*i.kuantitas_komoditas
@@ -198,7 +197,7 @@ def home(request):
             
         print(datajualperbulan)
 
-        # PIE CHART
+        # PIE CHART PASAR
         pasar_pendapatan = {}
         alldetailjual = models.detail_penjualan.objects.all()
 
@@ -209,7 +208,8 @@ def home(request):
             if item.id_produk:
                 produk = models.produk.objects.get(id_produk=item.id_produk_id)
                 pendapatan += produk.hargaproduk * item.kuantitas_produk
-            elif item.id_komoditas:
+
+            if item.id_komoditas:
                 komoditas = models.komoditas.objects.get(id_komoditas=item.id_komoditas_id)
                 pendapatan += komoditas.harga_jual * item.kuantitas_komoditas
             
@@ -231,6 +231,51 @@ def home(request):
             sizes.append(pendapatan / total_pendapatan)
         print(labels)
         print(sizes)
+
+        # PIE CHART KOMODITAS
+        komoditas_pendapatan = {}
+        produk_pendapatan = {}
+        alldetailjual = models.detail_penjualan.objects.all()
+
+        for item in alldetailjual:
+            pendapatan = 0
+
+            if item.id_produk:
+                produk = models.produk.objects.get(id_produk=item.id_produk_id)
+                pendapatan += produk.hargaproduk * item.kuantitas_produk
+                if item.id_produk_id in produk_pendapatan:
+                    produk_pendapatan[item.id_produk_id] += pendapatan
+                else:
+                    produk_pendapatan[item.id_produk_id] = pendapatan
+
+            if item.id_komoditas:
+                komoditas = models.komoditas.objects.get(id_komoditas=item.id_komoditas_id)
+                pendapatan += komoditas.harga_jual * item.kuantitas_komoditas
+                if item.id_komoditas_id in komoditas_pendapatan:
+                    komoditas_pendapatan[item.id_komoditas_id] += pendapatan
+                else:
+                    komoditas_pendapatan[item.id_komoditas_id] = pendapatan
+
+        total_pendapatan1 = sum(komoditas_pendapatan.values()) + sum(produk_pendapatan.values())
+        # Menggabungkan data produk dan komoditas menjadi satu dictionary
+        labels1 = []
+        sizes1 = []
+
+        # Menambahkan data produk ke labels dan sizes
+        for produk_id, pendapatan in produk_pendapatan.items():
+            produk = models.produk.objects.get(id_produk=produk_id)
+            labels1.append(produk.namaproduk)
+            sizes1.append(pendapatan/total_pendapatan1)
+
+        # Menambahkan data komoditas ke labels dan sizes
+        for komoditas_id, pendapatan in komoditas_pendapatan.items():
+            komoditas = models.komoditas.objects.get(id_komoditas=komoditas_id)
+            nama_komoditas = komoditas.nama_komoditas + " " + komoditas.id_grade.nama_grade
+            labels1.append(nama_komoditas)
+            sizes1.append(pendapatan/total_pendapatan1)
+
+        print(labels1)
+        print(sizes1)
         context = {
             "profitbulanan" : format_profitbulanan,
             "penjualanbulanan" : format_penjualanbulanan,
@@ -238,7 +283,9 @@ def home(request):
             "profittahunan" : format_profittahunan,
             "datajualperbulan_json" : json.dumps(datajualperbulan),
             'labels' : json.dumps(labels),
-            'sizes' : json.dumps(sizes)
+            'sizes' : json.dumps(sizes),
+            'labels1' : json.dumps(labels1),
+            'sizes1' : json.dumps(sizes1)
         }
         return render(request, 'index.html', context)
 

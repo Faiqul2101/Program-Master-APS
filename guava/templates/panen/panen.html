@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mitra</title>
+    <title>PANEN</title>
 
     <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -46,11 +46,14 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
+            <!-- Nav Item - Dashboard -->
+            {% if is_admin or is_owner %}
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'home' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
+            {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -310,7 +313,7 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Data Mitra</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Data Panen</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -332,7 +335,9 @@
                                             <td>{{ item.tanggal_panen }}</td>
                                             <td>
                                                 <a href="{% url 'updatepanen' item.id_panen %}"><button class="btn btn-warning">Update</button></a>
+                                                {% if is_owner %}
                                                 <a href="{% url 'deletepanen' item.id_panen %}"><button class="btn btn-danger">Delete</button></a>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 <a href="{% url 'ubahdetailpanen' item.id_panen %}"><button class="btn btn-info">Ubah Panen</button/a>
@@ -363,7 +368,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>LOSIK TI UB</span>
                     </div>
                 </div>
             </footer>

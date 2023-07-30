@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mitra</title>
+    <title>DETAIL PENJUALAN</title>
 
     <!-- Custom fonts for this template -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -336,7 +336,9 @@
                                             <td>{{ item.kuantitas_produk}}</td>
                                             <td>
                                                 <a href="{% url 'updatedetailpenjualan' item.id_detailpenjualan %}"><button class="btn btn-warning">Update</button></a>
+                                                {% if is_owner %}
                                                 <a href="{% url 'deletedetailpenjualan' item.id_detailpenjualan %}"><button class="btn btn-danger">Delete</button></a>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -364,7 +366,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>LOSIK TI UB</span>
                     </div>
                 </div>
             </footer>

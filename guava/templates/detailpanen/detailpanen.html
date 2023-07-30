@@ -46,11 +46,13 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
+            {% if is_admin or is_owner %}
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'home' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
+            {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -340,7 +342,9 @@
                                             <td>{{ item.tanggalkadaluwarsa}}</td>
                                             <td>
                                                 <a href="{% url 'updatedetailpanen' item.id_detailpanen %}"><button class="btn btn-warning">Update</button></a>
+                                                {% if is_owner %}
                                                 <a href="{% url 'deletedetailpanen' item.id_detailpanen %}"><button class="btn btn-danger">Delete</button></a>
+                                                {% endif %}
                                             </td>
 
                                             
@@ -370,7 +374,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>LOSIK TI UB</span>
                     </div>
                 </div>
             </footer>
