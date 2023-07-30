@@ -35,7 +35,14 @@ def logoutview(request):
 
 def loginview(request):
     if request.user.is_authenticated:
-        return redirect("mitra")
+        group = None
+        if request.user.groups.exists():
+            group = request.user.groups.all()[0].name
+
+        if group == 'karyawan':
+            return redirect('mitra')
+        elif group in ['admin', 'owner']:
+            return redirect('home')
     else:
         return render(request,"login.html")
     
