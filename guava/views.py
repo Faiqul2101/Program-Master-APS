@@ -27,7 +27,7 @@ komoditas_to_produk_mapping = {
     }
 
 #  LOGIN
-@login_required
+@login_required(login_url="login")
 def logoutview(request):
     logout(request)
     messages.info(request,"Berhasil Logout")
@@ -45,34 +45,34 @@ def performlogin(request):
     else:
         print(request)
         username_login = request.POST['username']
-        # print(username)
         password_login = request.POST['password']
-        # print(username)
         userobj = authenticate(request, username=username_login,password=password_login)
         print(userobj)
         if userobj is not None:
             login(request, userobj)
             messages.success(request,"Login success")
-            return redirect("mitra")
+            if userobj.groups.filter(name='admin').exists() or userobj.groups.filter(name='owner').exists():
+                return redirect("home")
+            elif userobj.groups.filter(name='karyawan').exists():
+                return redirect("mitra")
+            
         else:
             messages.error(request,"Username atau Password salah !!!")
             return redirect("login")
         
-@login_required
+@login_required(login_url="login")
 def performlogout(request):
     logout(request)
     print("Anda keluar")
     return redirect("login")
 
 # DASHBOARD 
-@login_required
-@role_required(["admin"])
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def home(request):
     if not request.user.is_authenticated:
-        return render(request, 'loginsiam.html')
+        return render(request, 'login.html')
     else:
-        getdatabeli = models.detail_panen.objects.all()
-        getdatajual = models.detail_penjualan.objects.all()
         
         # DATA BULANAN
         currentdate = datetime.now()
@@ -242,9 +242,10 @@ def home(request):
         }
         return render(request, 'index.html', context)
 
-
 # MITRA
 
+@login_required
+@role_required(["owner", 'admin', 'karyawan'])
 def mitra(request):
     mitraobj = models.mitra.objects.all()
     
@@ -252,6 +253,8 @@ def mitra(request):
         'mitraobj' : mitraobj,
     })
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_mitra(request):
     if request.method == "GET":
         return render(request, 'mitra/createmitra.html')
@@ -273,7 +276,9 @@ def create_mitra(request):
         )
         newmitra.save()
         return redirect('mitra')
-    
+
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def validasi_mitra(request,id):
     mitraobj = models.mitra.objects.get(id_mitra = id)
     if request.method == "GET" :
@@ -291,6 +296,8 @@ def validasi_mitra(request,id):
         mitraobj.save()
         return redirect('mitra')
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def update_mitra(request,id):
     mitraobj = models.mitra.objects.get(id_mitra = id)
     if request.method == "GET" :
@@ -308,19 +315,24 @@ def update_mitra(request,id):
         mitraobj.save()
         return redirect('mitra')
 
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_mitra(request,id):
     mitraobj = models.mitra.objects.get(id_mitra = id)
     mitraobj.delete()
     return redirect('mitra')
 
 # GRADE
-
+@login_required(login_url="login")
+@role_required(["owner"])
 def grade(request):
     gradeobj = models.grade.objects.all()
     return render(request, 'grade/grade.html', {
         'gradeobj' : gradeobj
     })
 
+@login_required(login_url="login")
+@role_required(["owner"])
 def create_grade(request):
     if request.method == "GET":
         return render(request, "grade/creategrade.html")
@@ -334,6 +346,8 @@ def create_grade(request):
         ).save()
         return redirect('grade')
 
+@login_required(login_url="login")
+@role_required(["owner"])
 def update_grade(request, id):
     gradeobj = models.grade.objects.get(id_grade = id)
     if request.method == "GET":
@@ -346,6 +360,8 @@ def update_grade(request, id):
         gradeobj.save()
         return redirect('grade')
 
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_grade(request, id):
     gradeobj = models.grade.objects.get(id_grade = id)
     gradeobj.delete()
@@ -353,7 +369,8 @@ def delete_grade(request, id):
 
 # PRODUK
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def produk(request):
     allprodukobj = models.produk.objects.all()
 
@@ -361,7 +378,8 @@ def produk(request):
         'allprodukobj' : allprodukobj,
         })
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_produk(request):
     if request.method == "GET" :
         return render(request, 'produk/createproduk.html', )
@@ -378,7 +396,8 @@ def create_produk(request):
         return redirect('produk')
 
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def update_produk(request,id):
     produkobj = models.produk.objects.get(id_produk=id)
     if request.method == "GET":
@@ -392,7 +411,8 @@ def update_produk(request,id):
         produkobj.save()
         return redirect('produk')
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_produk(request, id):
     produkobj = models.produk.objects.get(id_produk=id)
     produkobj.delete()
@@ -400,7 +420,8 @@ def delete_produk(request, id):
 
 # PASAR
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def pasar(request):
     pasarobj = models.pasar.objects.all()
     # is_admin = request.user.groups.filter(name='Admin').exists()
@@ -410,7 +431,8 @@ def pasar(request):
         'pasarobj' : pasarobj,
     })
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_pasar(request):
     if request.method == "GET":
         return render(request, 'pasar/createpasar.html')
@@ -425,7 +447,8 @@ def create_pasar(request):
         newpasar.save()
         return redirect('pasar')
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def update_pasar(request,id):
     pasarobj = models.pasar.objects.get(id_pasar = id)
     if request.method == "GET" :
@@ -438,13 +461,15 @@ def update_pasar(request,id):
         pasarobj.save()
         return redirect('pasar')
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_pasar(request,id):
     pasarobj = models.pasar.objects.get(id_pasar = id)
     pasarobj.delete()
     return redirect('pasar')
 
-
+@login_required(login_url="login")
+@role_required(["owner", 'admin', 'karyawan'])
 def komoditas(request):
     allkomoditasobj = models.komoditas.objects.all()
     stok = stok_keseluruhan()
@@ -459,6 +484,8 @@ def komoditas(request):
         'tuple': keseluruhan,
     })
 
+@login_required(login_url="login")
+@role_required(["owner", 'karyawan'])
 def create_komoditas(request):
     if request.method == 'GET':
         allgradeobj = models.grade.objects.all()
@@ -482,6 +509,8 @@ def create_komoditas(request):
 
         return redirect('komoditas')
 
+@login_required(login_url="login")
+@role_required(["owner", 'karyawan'])
 def update_komoditas(request, id):
     allkomoditasobj = models.komoditas.objects.get(id_komoditas=id)
     allgradeobj = models.grade.objects.all()
@@ -501,6 +530,8 @@ def update_komoditas(request, id):
         allkomoditasobj.save()
         return redirect('komoditas')
     
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_komoditas(request, id):
     komoditasobj = models.komoditas.objects.get(id_komoditas=id)
     komoditasobj.delete()
@@ -508,7 +539,8 @@ def delete_komoditas(request, id):
 
 # TRANSAKSI LAIN
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def transaksi_lain(request):
     transaksi_lain_all = models.transaksi_lain.objects.all()
     
@@ -516,7 +548,8 @@ def transaksi_lain(request):
         'transaksilainobj' : transaksi_lain_all
     })
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_transaksi_lain(request):
     if request.method == "GET":
         return render (request, "transaksilain/createtransaksilain.html")
@@ -533,7 +566,8 @@ def create_transaksi_lain(request):
         new_transaksi_lain.save()
         return redirect("transaksilain")
     
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def update_transaksi_lain(request, id):
     transaksi_lain_all = models.transaksi_lain.objects.get(id_transaksi = id)
     if request.method == "GET":
@@ -552,7 +586,8 @@ def update_transaksi_lain(request, id):
         transaksi_lain_all.save()
         return redirect('transaksilain')
     
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_transaksi_lain(request,id):
     transaksi_lain_all = models.transaksi_lain.objects.get(id_transaksi=id)
     transaksi_lain_all.delete()
@@ -560,7 +595,8 @@ def delete_transaksi_lain(request,id):
 
 # PANEN
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin', 'karyawan'])
 def panen(request):
     allpanenobj = models.panen.objects.all()
     return render(request, 'panen/panen.html', {
@@ -568,7 +604,8 @@ def panen(request):
         })
 
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'karyawan'])
 def create_panen(request, id):
     try:
         mitraobj = models.mitra.objects.get(id_mitra=id)
@@ -624,7 +661,8 @@ def create_panen(request, id):
     context = {'formset': formset}
     return render(request, 'detailpanen/createdetailpanen.html', context)
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'karyawan'])
 def ubah_panen(request, id):
     OrderFormSet = inlineformset_factory(models.panen, 
                                         models.detail_panen,
@@ -646,7 +684,8 @@ def ubah_panen(request, id):
     context = {'formset' : formset}
     return render (request, 'detailpanen/ubahdetailpanen.html', context)
 
-@login_required
+@role_required(["owner", 'karyawan'])
+@login_required(login_url="login")
 def update_panen(request, id):
     panenobj = models.panen.objects.get(id_panen = id)
     if request.method == "GET":
@@ -665,7 +704,8 @@ def update_panen(request, id):
         panenobj.save()
         return redirect('panen')
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_panen(request,id):
     panen_obj = models.panen.objects.get(id_panen = id)
     panen_obj.delete()
@@ -673,7 +713,8 @@ def delete_panen(request,id):
 
 # DETAIL PANEN
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin', 'karyawan'])
 def detailpanen(request):
     alldetailpanenobj = models.detail_panen.objects.all()
     detailpanen_olah = models.detail_panen.objects.filter(id_komoditas__id_grade__nama_grade = "Olah")
@@ -683,7 +724,8 @@ def detailpanen(request):
         'detailpanen_olah' : detailpanen_olah
         })
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'karyawan'])
 def update_detailpanen(request, id):
     detailpanenobj = models.detail_panen.objects.get(id_detailpanen=id)
     allkomoditasobj = models.komoditas.objects.all()
@@ -708,7 +750,8 @@ def update_detailpanen(request, id):
 
         return redirect('detailpanen')
     
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_detailpanen(request,id):
     detailpanenobj = models.detail_panen.objects.get(id_detailpanen=id)
     detailpanenobj.delete()
@@ -716,14 +759,16 @@ def delete_detailpanen(request,id):
 
 # PENJUALAN 
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def penjualan(request):
     penjualanobj = models.penjualan.objects.all()
     return render (request, 'penjualan/penjualan.html',{
         'penjualanobj' : penjualanobj
     })
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def updatepenjualan(request,id):
     penjualanobj = models.penjualan.objects.get(id_penjualan=id)
     datapasar = models.pasar.objects.all()
@@ -742,7 +787,8 @@ def updatepenjualan(request,id):
         penjualanobj.save()
         return redirect('penjualan')
 
-@login_required
+@login_required(login_url="login")
+@role_required(["owner"])
 def deletepenjualan(request, id):
     penjualanobj = models.penjualan.objects.get(id_penjualan = id)
     penjualanobj.delete()
@@ -751,24 +797,32 @@ def deletepenjualan(request, id):
 
 # DETAIL PENJUALAN
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def detail_penjualan(request):
     detailpenjualanobj = models.detail_penjualan.objects.all()
     return render(request, 'detailpenjualan/detailpenjualan.html', {
         'detailpenjualanobj': detailpenjualanobj
     })
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def detail_penjualan_komoditas(request):
     detailpenjualanobj = models.detail_penjualan.objects.exclude(id_komoditas=None)
     return render(request, 'detailpenjualan/detailpenjualan_komoditas.html', {
         'detailpenjualanobj': detailpenjualanobj
     })
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def detail_penjualan_produk(request):
     detailpenjualanobj = models.detail_penjualan.objects.exclude(id_produk=None)
     return render(request, 'detailpenjualan/detailpenjualan_produk.html', {
         'detailpenjualanobj': detailpenjualanobj
     })
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def cerate_penjualan(request):
     if request.method == 'GET':
         pasarobj = models.pasar.objects.all()
@@ -787,6 +841,8 @@ def cerate_penjualan(request):
 
         return redirect('penjualan')
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_detailpenjualan_produk(request, id):
     OrderFormSet = inlineformset_factory(
         models.penjualan,
@@ -846,7 +902,8 @@ def create_detailpenjualan_produk(request, id):
 
     return render(request, 'detailpenjualan/createdetailpenjualan_produk.html', {'formset': formset, 'penjualan': penjualan_obj})
 
-
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def create_detailpenjualan_komoditas(request, id):
     OrderFormSet = inlineformset_factory(
         models.penjualan,
@@ -888,7 +945,8 @@ def create_detailpenjualan_komoditas(request, id):
     
     return render(request, 'detailpenjualan/createdetailpenjualan_komoditas.html', {'formset': formset, 'penjualan': penjualan_obj})
 
-
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def update_detailpenjualan(request, id):
     getdetailpenjualan = models.detail_penjualan.objects.get(id_detailpenjualan = id)
     if request.method == "GET":
@@ -922,11 +980,12 @@ def update_detailpenjualan(request, id):
         getdetailpenjualan.save()
         return redirect("detailpenjualan")
 
+@login_required(login_url="login")
+@role_required(["owner"])
 def delete_detailpenjualan(request,id):
     getdetailpenjualan = models.detail_penjualan.objects.get(id_detailpenjualan = id)
     getdetailpenjualan.delete()
     return redirect('detailpenjualan')
-
 
 def stok_awal(obj):
     stok_per_komoditas =[]
@@ -983,7 +1042,8 @@ def stok_keseluruhan():
 
     return gabungan
 
-
+@login_required(login_url="login")
+@role_required(["owner"])
 def laporan_laba_rugi(request):
     if request.method == "GET":
         return render(request,'laporanlabarugi/laporan.html')
@@ -1066,6 +1126,8 @@ def laporan_laba_rugi(request):
             'tanggalakhir': akhir,
         })
     
+@login_required(login_url="login")
+@role_required(["owner"])
 def laporan_laba_rugi_pdf(request,mulai,akhir):
     # PENJUALAN
     penjualanrange = models.penjualan.objects.filter(tanggal_penjualan__range = (mulai, akhir))
@@ -1159,6 +1221,8 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
     
     return response
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def laporanpenjualan(request):
     if request.method == "GET":
         return render(request, 'laporanpenjualan/laporanjual.html')
@@ -1198,7 +1262,9 @@ def laporanpenjualan(request):
             'tanggalakhir': akhir,
             'pemasukan': totalkeseluruhan
         })
-    
+
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def laporanpenjualanpdf (request, mulai, akhir):
     detailobj = []
 
@@ -1233,7 +1299,6 @@ def laporanpenjualanpdf (request, mulai, akhir):
             'pemasukan' : totalkeseluruhan,
             'tanggalmulai': mulai,
             'tanggalakhir': akhir,
-            # 'totaltransaksi' : totaltransaksi,
             })
     html = HTML(string=html_string)
     result = html.write_pdf()
@@ -1248,6 +1313,8 @@ def laporanpenjualanpdf (request, mulai, akhir):
     
     return response
 
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def laporanpanen(request):
     if request.method == "GET":
         return render(request, 'laporanpanen/laporan.html')
@@ -1283,7 +1350,9 @@ def laporanpanen(request):
             'tanggalakhir': akhir,
             'pengeluaran': totalkeseluruhan
         })
-    
+
+@login_required(login_url="login")
+@role_required(["owner", 'admin'])
 def laporanpanenpdf (request, mulai, akhir):
     detailobj = []
 
@@ -1314,7 +1383,6 @@ def laporanpanenpdf (request, mulai, akhir):
             'pemasukan' : totalkeseluruhan,
             'tanggalmulai': mulai,
             'tanggalakhir': akhir,
-            # 'totaltransaksi' : totaltransaksi,
             })
     html = HTML(string=html_string)
     result = html.write_pdf()
