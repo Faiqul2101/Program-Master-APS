@@ -1245,7 +1245,7 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
     lababersih = labasebelumpajak - biayapajak
 
     response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Disposition'] = 'inline; filename=laporan laba rugi.pdf'
     response['Content-Transfer-Encoding'] = 'binary'
     html_string = render_to_string(
         'laporanlabarugi/laporanlabarugipdf.html',{
@@ -1345,7 +1345,7 @@ def laporanpenjualanpdf (request, mulai, akhir):
     totalkeseluruhan = sum(listtotalbanget)
 
     response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Disposition'] = 'inline; filename=laporanpenjualan.pdf'
     response['Content-Transfer-Encoding'] = 'binary'
     html_string = render_to_string(
         'laporanpenjualan/laporanpenjualanpdf.html',{
@@ -1429,12 +1429,12 @@ def laporanpanenpdf (request, mulai, akhir):
     totalkeseluruhan = sum(listtotalbanget)
 
     response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=list_of_students.pdf'
+    response['Content-Disposition'] = 'inline; filename=laporan panen.pdf'
     response['Content-Transfer-Encoding'] = 'binary'
     html_string = render_to_string(
         'laporanpanen/laporanpanenpdf.html',{
             'detailobj' : detailobj,
-            'pemasukan' : totalkeseluruhan,
+            'pengeluaran' : totalkeseluruhan,
             'tanggalmulai': mulai,
             'tanggalakhir': akhir,
             })
