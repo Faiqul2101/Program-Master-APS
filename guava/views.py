@@ -45,7 +45,7 @@ def loginview(request):
             return redirect('home')
     else:
         return render(request,"login.html")
-    
+
 def performlogin(request):
     if request.method != "POST":
         return HttpResponse("Method not Allowed")

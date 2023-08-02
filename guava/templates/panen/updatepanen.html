@@ -316,7 +316,7 @@
                             <!-- <form action="" method="post"> -->
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Nama Pembeli</label>
+                                    <label for="exampleInputPassword1" class="form-label">Nama Mitra</label>
                                     <select class="form-control" id="exampleFormControlSelect1" name="id_mitra">
                                         {% for item in datamitra %}
                                         {% if item.nama_mitra == panenobj.id_mitra.nama_mitra %}
@@ -331,9 +331,6 @@
                                     <label for="exampleInputEmail1" class="form-label">Tanggal Panen</label>
                                     <input required type="date" class="form-control" id="exampleFormControlSelect1" name="tanggal_panen"
                                     value="{{ tanggal }}">
-                                        <!-- <option selected value="Pcs">Pcs</option>
-                                        <option value="Botol">Botol</option>
-                                        <option value="Box">Box</option> -->
                                         </input>
                                 </div>
 
