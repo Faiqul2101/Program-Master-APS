@@ -45,8 +45,7 @@ class komoditas(models.Model):
     nama_komoditas = models.CharField(max_length=50)
     harga_beli = models.IntegerField()
     harga_jual = models.IntegerField()
-    stok = 0
-
+    
     def __str__(self):
         return "{} - {}".format(self.nama_komoditas, self.id_grade)
             

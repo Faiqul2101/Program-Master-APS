@@ -50,11 +50,9 @@ def performlogin(request):
     if request.method != "POST":
         return HttpResponse("Method not Allowed")
     else:
-        print(request)
         username_login = request.POST['username']
         password_login = request.POST['password']
         userobj = authenticate(request, username=username_login,password=password_login)
-        print(userobj)
         if userobj is not None:
             login(request, userobj)
             messages.success(request,"Login success")
@@ -70,7 +68,6 @@ def performlogin(request):
 @login_required(login_url="login")
 def performlogout(request):
     logout(request)
-    print("Anda keluar")
     return redirect("login")
 
 # DASHBOARD 
@@ -104,20 +101,16 @@ def home(request):
                 if i.id_produk is not None:
                     totalpenjualan_produk = i.id_produk.hargaproduk*i.kuantitas_produk
                     penjualansebulan_produk.append(totalpenjualan_produk)
-        print(f'Total Produk: {penjualansebulan_produk} \n Total Komoditas: {penjualansebulan_komoditas}')
-        print(sum(penjualansebulan_produk))
 
         for item in pembelianbulan:
             getdetailbeli = models.detail_panen.objects.filter(id_panen=item.id_panen)
             for i in getdetailbeli:
                 totalpembelian = i.id_komoditas.harga_beli*i.jumlah
                 pembeliansebulan.append(totalpembelian)
-        print('panen ', pembeliansebulan)
         
         for item in transaksibulan:
             totaltransaksi = item.biaya
             transaksisebulan.append(totaltransaksi)
-        print(transaksisebulan)
 
         totalpenjualanbulanan = sum(penjualansebulan_komoditas) + sum(penjualansebulan_produk)
         totalpembelianbulanan = sum(pembeliansebulan)
@@ -202,7 +195,6 @@ def home(request):
             totalperbulan_produk = sum(jualperbulanan_produk)
             datajualperbulan.append(totalperbulan_komoditas + totalperbulan_produk)
             
-        print(datajualperbulan)
 
         # PIE CHART PASAR
         pasar_pendapatan = {}
@@ -236,8 +228,6 @@ def home(request):
             pasar = models.pasar.objects.get(id_pasar=pasar_id)
             labels.append(pasar.nama_pasar)
             sizes.append(pendapatan / total_pendapatan)
-        print(labels)
-        print(sizes)
 
         # PIE CHART KOMODITAS
         komoditas_pendapatan = {}
@@ -264,7 +254,7 @@ def home(request):
                     komoditas_pendapatan[item.id_komoditas_id] = pendapatan
 
         total_pendapatan1 = sum(komoditas_pendapatan.values()) + sum(produk_pendapatan.values())
-        # Menggabungkan data produk dan komoditas menjadi satu dictionary
+
         labels1 = []
         sizes1 = []
 
@@ -281,8 +271,6 @@ def home(request):
             labels1.append(nama_komoditas)
             sizes1.append(pendapatan/total_pendapatan1)
 
-        print(labels1)
-        print(sizes1)
         context = {
             "profitbulanan" : format_profitbulanan,
             "penjualanbulanan" : format_penjualanbulanan,
@@ -318,7 +306,6 @@ def create_mitra(request):
         nomor_mitra = request.POST["nomor_mitra"]
         tanggal_mulai_mitra = request.POST["tanggal_mulai_mitra"]
         durasi_kontrak = request.POST["durasi_kontrak"]
-        # luas_lahan = request.POST["luas_lahan"]
 
         newmitra = models.mitra(
             nama_mitra = nama_mitra,
@@ -326,7 +313,6 @@ def create_mitra(request):
             nomor_mitra = nomor_mitra,
             tanggal_mulai_mitra = tanggal_mulai_mitra,
             durasi_kontrak = durasi_kontrak,
-            # luas_lahan = luas_lahan   
         )
         newmitra.save()
         return redirect('mitra')
@@ -336,10 +322,8 @@ def create_mitra(request):
 def validasi_mitra(request,id):
     mitraobj = models.mitra.objects.get(id_mitra = id)
     if request.method == "GET" :
-        # tanggal = datetime.strftime(mitraobj.tanggal_mulai_mitra, '%Y-%m-%d')
         return render(request, 'mitra/validasimitra.html', {
             'mitraobj' : mitraobj,
-            # 'tanggal' : tanggal
         })
     else:
         luas = mitraobj.luas_lahan = request.POST['luas_lahan']
@@ -478,8 +462,6 @@ def delete_produk(request, id):
 @role_required(["owner", 'admin'])
 def pasar(request):
     pasarobj = models.pasar.objects.all()
-    # is_admin = request.user.groups.filter(name='Admin').exists()
-    # is_pegawai = request.user.groups.filter(name='Pegawai').exists()
 
     return render(request, 'pasar/pasar.html', {
         'pasarobj' : pasarobj,
@@ -532,7 +514,6 @@ def komoditas(request):
         for x in stok:
             if item.nama_komoditas + ' ' + item.id_grade.nama_grade == x['komoditas']:
                 keseluruhan.append((item , x['stok']))
-    print(keseluruhan)
     
     return render(request, 'komoditas/komoditas.html', {
         'tuple': keseluruhan,
@@ -709,7 +690,6 @@ def create_panen(request, id):
                             except models.produk.DoesNotExist:
                                 pass
                 formset.save()
-                # Update stok_produk for "Olah" komoditas
             return redirect('detailpanen')
 
     context = {'formset': formset}
@@ -772,7 +752,6 @@ def delete_panen(request,id):
 def detailpanen(request):
     alldetailpanenobj = models.detail_panen.objects.all()
     detailpanen_olah = models.detail_panen.objects.filter(id_komoditas__id_grade__nama_grade = "Olah")
-    print(alldetailpanenobj)
     return render(request, 'detailpanen/detailpanen.html', {
         "alldetailpanenobj" : alldetailpanenobj,
         'detailpanen_olah' : detailpanen_olah
@@ -921,10 +900,8 @@ def create_detailpenjualan_produk(request, id):
                             if produk_obj.namaproduk in komoditas_to_produk_mapping:
                                 komoditas_grade_olah, factor = komoditas_to_produk_mapping[produk_obj.namaproduk]
 
-                                # Calculate the quantity of commodity produced based on the sales of the product
                                 produced_commodity_quantity = kuantitas_komoditas * factor
 
-                                # Check if the stock of the related processed commodity is sufficient
                                 stok_tersedia = stok_olah()
                                 for stok_item in stok_tersedia:
                                     if stok_item['komoditas'] == komoditas_grade_olah + ' Olah':
@@ -933,20 +910,17 @@ def create_detailpenjualan_produk(request, id):
                                             detail_penjualan_obj.id_penjualan = penjualan_obj
                                             detail_penjualan_obj.save()
 
-                                            # Update the stock quantity of the related processed commodity
                                             stok_item['stok'] -= produced_commodity_quantity
                                         else:
                                             form.add_error('kuantitas_produk', 'Jumlah Produk melebihi stok yang tersedia.')
                                             raise ValidationError('Jumlah Produk melebihi stok yang tersedia.')
                                         break
                                 else:
-                                    # The related processed commodity was not found in the stok_tersedia list
                                     form.add_error('id_produk', 'Produk tidak ada dalam daftar pemetaan komoditas.')
                                     raise ValidationError('Produk tidak ada dalam daftar pemetaan komoditas.')
 
                 return redirect('detailpenjualan_produk')
             except ValidationError as e:
-                # Tangkap ValidationError dan tambahkan kesalahan ke form individu dalam formset
                 for form in formset:
                     if form.has_error('kuantitas_produk') or form.has_error('id_produk'):
                         form.add_error(None, e)
@@ -990,7 +964,6 @@ def create_detailpenjualan_komoditas(request, id):
 
                 return redirect('detailpenjualan_komoditas')
             except ValidationError as e:
-                # Tangkap ValidationError dan tambahkan kesalahan ke form individu dalam formset
                 for form in formset:
                     if form.has_error('kuantitas_komoditas'):
                         form.add_error('kuantitas_komoditas', e)
@@ -1048,7 +1021,6 @@ def stok_awal(obj):
         totalpenjualan =0
         totalpanen =0
         a = models.detail_penjualan.objects.filter(id_komoditas = i.id_komoditas)
-        # print('aaa',a,'aaa')
         for x in a:
             totalpenjualan += x.kuantitas_komoditas
         b = models.detail_panen.objects.filter(id_komoditas=i.id_komoditas)
@@ -1075,7 +1047,6 @@ def stok_olah():
         for x in getdetailjual:
             kuantitasproduk += x.kuantitas_produk
 
-        print(f"Total quantity of {i.namaproduk} sold: {kuantitasproduk}")
 
         if i.namaproduk in komoditas_to_produk_mapping:
             komoditas_grade_olah, factor = komoditas_to_produk_mapping[i.namaproduk]
@@ -1141,7 +1112,7 @@ def laporan_laba_rugi(request):
         biayahpp = ["Biaya Tenaga Kerja" , "Biaya Listrik" , "Biaya Air"]
         biayapemasaran = 0
         biayaadministrasi = 0
-        biayapajak = 0
+        
 
         for item in transaksirange:
             if item.jenis_transaksi in biayahpp:
@@ -1150,8 +1121,7 @@ def laporan_laba_rugi(request):
                 biayapemasaran += item.biaya
             elif item.jenis_transaksi == "Biaya Administrasi":
                 biayaadministrasi += item.biaya
-            elif item.jenis_transaksi == "Biaya Pajak":
-                biayapajak += item.biaya
+            
 
         totaltransaksi = sum(transaksisebulan)
         totalbebanusaha = biayapemasaran + biayaadministrasi
@@ -1162,7 +1132,7 @@ def laporan_laba_rugi(request):
 
         # LABA SEBELUM PAJAK
         labasebelumpajak = labarugi -totalbebanusaha
-        
+        biayapajak = round(0.005 * labasebelumpajak, 2)
         # LABA BERSIH
         lababersih = labasebelumpajak - biayapajak
 
@@ -1219,7 +1189,7 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
     biayahpp = ["Biaya Tenaga Kerja" , "Biaya Listrik" , "Biaya Air"]
     biayapemasaran = 0
     biayaadministrasi = 0
-    biayapajak = 0
+    
 
     for item in transaksirange:
         if item.jenis_transaksi in biayahpp:
@@ -1228,8 +1198,6 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
             biayapemasaran += item.biaya
         elif item.jenis_transaksi == "Biaya Administrasi":
             biayaadministrasi += item.biaya
-        elif item.jenis_transaksi == "Biaya Pajak":
-            biayapajak += item.biaya
 
     totaltransaksi = sum(transaksisebulan)
     totalbebanusaha = biayapemasaran + biayaadministrasi
@@ -1240,6 +1208,7 @@ def laporan_laba_rugi_pdf(request,mulai,akhir):
 
     # LABA SEBELUM PAJAK
     labasebelumpajak = labarugi -totalbebanusaha
+    biayapajak = round(0.005 * labasebelumpajak, 2)
     
     # LABA BERSIH
     lababersih = labasebelumpajak - biayapajak
@@ -1308,7 +1277,6 @@ def laporanpenjualan(request):
             detailobj.append(datadetailobj)
         totalkeseluruhan = sum(listtotalbanget)
 
-        print(detailobj)
 
         return render(request, 'laporanpenjualan/laporanpenjualan.html', {
             'detailobjek' : detailobj,
@@ -1395,8 +1363,6 @@ def laporanpanen(request):
             datadetailobj.append(totalbanget)
             detailobj.append(datadetailobj)
         totalkeseluruhan = sum(listtotalbanget)
-
-        print(detailobj)
 
         return render(request, 'laporanpanen/laporanpanen.html', {
             'detailobjek' : detailobj,
