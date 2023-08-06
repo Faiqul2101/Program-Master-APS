@@ -327,7 +327,7 @@ def validasi_mitra(request,id):
         })
     else:
         luas = mitraobj.luas_lahan = request.POST['luas_lahan']
-        if int(luas) >= 100:
+        if int(luas) >= 1000:
             mitraobj.status_mitra = True
         else:
             mitraobj.status_mitra = False
