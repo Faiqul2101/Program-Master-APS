@@ -5,5 +5,5 @@ def is_owner(request):
     return {'is_owner': request.user.groups.filter(name='owner').exists()}
 
 def is_karyawan(request):
-    return {'is_pegawai': request.user.groups.filter(name='karyawan').exists()}
+    return {'is_karyawan': request.user.groups.filter(name='karyawan').exists()}
 
